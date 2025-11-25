@@ -212,6 +212,19 @@ document.querySelectorAll('.about-card').forEach(card => {
         card.style.setProperty('--y', `${y}px`);
     });
 });
+
+const supportBox = document.querySelector('.support-box');
+if (supportBox) {
+    supportBox.addEventListener('mouseenter', () => {
+        supportBox.classList.remove('glow-fade-out');
+        supportBox.classList.add('glow-active');
+    });
+
+    supportBox.addEventListener('mouseleave', () => {
+        supportBox.classList.remove('glow-active');
+        supportBox.classList.add('glow-fade-out');
+    });
+}
 })();{% endraw %}
   </script>
 
@@ -364,6 +377,7 @@ document.querySelectorAll('.about-card').forEach(card => {
 
     .support-box {
       transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.05);
     }
     .bg-grid-pattern {
       --color: rgba(114, 114, 114, 0.3);
@@ -374,9 +388,17 @@ document.querySelectorAll('.about-card').forEach(card => {
       animation-play-state: paused;
     }
 
-    .support-box:hover {
+    .support-box.glow-active {
       border-color: rgba(146, 105, 255, 0.5);
       animation: fadeInGlow 0.5s ease-in-out forwards, pulseGlow 2s 0.5s ease-in-out infinite;
+    }
+
+    .support-box.glow-fade-out {
+      animation: fadeOutGlow 0.5s ease-in-out forwards;
+    }
+
+    .support-box.glow-active .bg-grid-pattern {
+      animation-play-state: running;
     }
 
     @keyframes fadeInGlow {
@@ -388,8 +410,13 @@ document.querySelectorAll('.about-card').forEach(card => {
       }
     }
 
-    .support-box:hover .bg-grid-pattern {
-      animation-play-state: running;
+    @keyframes fadeOutGlow {
+      from {
+        box-shadow: 0 0 25px rgba(146, 105, 255, 0.6), 0 0 5px rgba(146, 105, 255, 0.4) inset;
+      }
+      to {
+        box-shadow: 0 0 0 rgba(146, 105, 255, 0), 0 0 0 rgba(146, 105, 255, 0) inset;
+      }
     }
 
     @keyframes scrollGrid {
