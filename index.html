@@ -1,0 +1,385 @@
+<div class="bg-cover bg-center mx-auto w-full px-4 !scroll-smooth relative">
+  {% if announcement.length > 1 %}
+  <div id="announcement-div"
+    class="fade-out fixed top-20 right-2 bg-[#0a0a0a] p-4 rounded-md z-30 shadow-md border sm:max-w-sm max-w-[300px]">
+    <div id="announcement-close-btn" class="absolute top-1 right-1 cursor-pointer">
+      <svg width="16" height="16" viewBox="0 0 24 24" data-name="Line Color" xmlns="http://www.w3.org/2000/svg"
+        class="icon line-color">
+        <path style="fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2" d="M19 19 5 5" />
+        <path data-name="primary"
+          style="fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2" d="M19 5 5 19" />
+      </svg>
+    </div>
+    <format-markdown content="{{ announcement | escape }}"></format-markdown>
+  </div>
+  {% endif %}
+  <slot data-id="1" class="min-h-[100px]">
+    <vertical-layout data-id="2a4a9a67-7276-4e3b-a150-1a03ab0fceed" data-slots="5"
+      style="gap: 24px; align-items: center; justify-content: start" data-spacing="36" data-align-items="center"
+      class="pt-4" data-justify-items="start">
+      {% render "indexPage/header"
+      , productsSold: productsSold
+      , averageRating: averageRating
+      , image: image
+      , backgroundImage: backgroundImage
+      , name: name %}
+      <!-- Featured Products -->
+      {% if isAnyProductFeatured %}
+      {% render "indexPage/featuredProducts"
+      , productsOrGroups: productsOrGroups %}
+      {%- endif %}
+      <!-- Our Products -->
+
+      <div class="w-full relative">
+        <div class="flex flex-col items-center pt-12 z-10 relative" id="products-list">
+          <div class="flex flex-col items-center gap-2 px-4">
+            <div class="relative text-blue-500">
+              <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
+              <div
+                class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-smile-plus">
+                  <path d="M22 11v1a10 10 0 1 1-9-10"></path>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                  <line x1="9" x2="9.01" y1="9" y2="9"></line>
+                  <line x1="15" x2="15.01" y1="9" y2="9"></line>
+                  <path d="M16 5h6"></path>
+                  <path d="M19 2v6"></path>
+                </svg>
+                Best Seller
+              </div>
+            </div>
+            <h2 class="text-center text-3xl font-semibold">Best Seller Products</h2>
+            <p class="max-w-xl text-center text-xs text-muted-foreground">Products that are loved by our customers</p>
+          </div>
+        </div>
+
+        <slot data-id="ccecc470-9d14-4065-8d11-7cb4df6110a3" class="w-full">
+          <div class="relative w-full">
+            {% assign arr = productsOrGroups %}
+            <div id="products"
+              class="relative mx-auto mt-10 grid w-fit grid-flow-row gap-6 px-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {%- for product in arr %}
+              {% if product.isGroup == false %}
+              <!-- Product Card -->
+              {% render "indexPage/productCard"
+              , product: product %}
+
+              {% else %}
+              <!-- Grouped Product -->
+              {% render "indexPage/productGroupCard"
+              , product: product %}
+              {% endif %}
+              {%- endfor %}
+            </div>
+          </div>
+        </slot>
+      </div>
+
+      <!-- Our Bundles -->
+      {% if bundles.length > 0 %}
+      <div class="flex flex-col items-center pt-12">
+        <div class="flex flex-col items-center gap-2 px-4">
+          <div class="relative text-blue-500">
+            <div class="absolute h-full w-full  bg-[--accent-color] opacity-10 rounded-md"></div>
+            <div
+              class="whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-group">
+                <path d="M3 7V5c0-1.1.9-2 2-2h2" />
+                <path d="M17 3h2c1.1 0 2 .9 2 2v2" />
+                <path d="M21 17v2c0 1.1-.9 2-2 2h-2" />
+                <path d="M7 21H5c-1.1 0-2-.9-2-2v-2" />
+                <rect width="7" height="5" x="7" y="7" rx="1" />
+                <rect width="7" height="5" x="10" y="12" rx="1" />
+              </svg>
+              Popular Bundle
+            </div>
+          </div>
+          <h2 class="text-center text-3xl font-semibold">Popular Bundles</h2>
+          <p class="max-w-xl text-center text-xs text-muted-foreground">Bundles curated to suit your needs</p>
+        </div>
+      </div>
+
+      <slot data-id="ccecc470-9d14-4065-8d11-7cb4df6110a3" class="w-full">
+        {% assign arr = bundles %}
+        <div id="bundles"
+          class="relative mx-auto mt-10 grid w-fit grid-flow-row gap-6 px-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {%- for bundle in arr %}
+          <!-- Bundle Card -->
+          {% render "indexPage/bundleCard"
+          , bundle: bundle %}
+          {%- endfor %}
+        </div>
+      </slot>
+      {%- endif %}
+      <!-- Why should you choose us? -->
+      <div id="why-choose-us" class="py-12 sm:py-16 lg:py-20 text-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center gap-2 px-4">
+            <div class="relative text-blue-500">
+              <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
+              <div
+                class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                Why Us?
+              </div>
+            </div>
+            <h2 class="text-center text-3xl sm:text-4xl font-bold">Why should you choose us?</h2>
+            <p class="max-w-xl text-center text-xs text-muted-foreground">Experience unparalleled service with our dedicated team, always ready to assist with any of your needs. Our mission is to simplify your life.</p>
+          </div>
+
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+          <!-- Top row -->
+          <div class="about-card">
+            <h3 class="text-xl font-semibold mb-2">Instant Delivery</h3>
+            <p class="text-muted-foreground/70 text-center">
+              Products are instantly available via download after purchase.
+            </p>
+          </div>
+
+          <div class="about-card">
+            <h3 class="text-xl font-semibold mb-2">Safe & Quality</h3>
+            <p class="text-muted-foreground/70 text-center">
+              We offer you the safest and best premium products on the market.
+            </p>
+          </div>
+
+          <!-- Middle row -->
+          <div class="about-card">
+            <h3 class="text-xl font-semibold mb-2">Secure Payments</h3>
+            <p class="text-muted-foreground/70 text-center">
+              We use trusted payment gateways to ensure your transactions are safe.
+            </p>
+          </div>
+
+          <div class="about-card">
+            <h3 class="text-xl font-semibold mb-2">Easy To Use</h3>
+            <p class="text-muted-foreground/70 text-center">
+              Our cheats are designed to be easy to use. Any user can use our cheats without any issues.
+            </p>
+          </div>
+        </div>
+
+        <!-- Bottom big box -->
+        <div
+          class="support-box mt-12 max-w-5xl mx-auto bg-gradient-to-br from-[#1a1a2a] to-[#0a0a0a] rounded-xl p-10 shadow-xl flex flex-col items-center justify-center border border-[rgba(128,128,255,0.1)] relative overflow-hidden">
+          <div class="absolute inset-0 bg-grid-pattern -z-0"></div>
+          <h3 class="text-6xl font-bold mb-2 text-[#9269FF]">24/7</h3>
+          <p class="text-3xl font-semibold mb-6 text-[#9269FF]">Support</p>
+          <div class="flex gap-6">
+            <a href="#" class="product-btn btn-download">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                <path d="M9.93 7.51a6.47 6.47 0 0 1 8.56 8.56"></path>
+                <path d="M14.07 16.49a6.47 6.47 0 0 1-8.56-8.56"></path>
+                <path
+                  d="M7.51 9.93a2.5 2.5 0 0 1 0-3.54l1.06-1.06a2.5 2.5 0 0 1 3.54 0l1.06 1.06a2.5 2.5 0 0 1 0 3.54l-1.06 1.06a2.5 2.5 0 0 1-3.54 0Z">
+                </path>
+                <path
+                  d="M16.49 14.07a2.5 2.5 0 0 1 0-3.54l1.06-1.06a2.5 2.5 0 0 1 3.54 0l1.06 1.06a2.5 2.5 0 0 1 0 3.54l-1.06 1.06a2.5 2.5 0 0 1-3.54 0Z">
+                </path>
+              </svg>
+              Get Support
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- FAQ section -->
+      {% render "indexPage/faq" %}
+    </vertical-layout>
+  </slot>
+  <script key="indexPage-script">
+    {% raw %}"use strict";(()=>{function setLayoutCartCount(cartCount){let cartCountSpan=document.getElementById("cart-count");cartCountSpan&&(cartCountSpan.innerText=cartCount.toString())}function withErrorHandling(fn){try{return fn()}catch(e){console.error(e)}}async function getCartData({localCartStorage}){return withErrorHandling(async()=>{let cartResponse=await fetch("/api/getCart",{method:"POST",body:JSON.stringify(localCartStorage)});if(!cartResponse.ok)throw new Error("Failed to fetch cart");return await cartResponse.json()})??{items:[],bundles:[]}}function addItemOrBundleToCartObject({params}){let prev={...localCart};return"item"in params?(console.log(prev.items),prev.items.find(item=>item.variant.id===params.item.variant.id)?"Item already in cart":{...prev,items:[...prev.items,{id:params.item.id,quantity:params.item.quantity,coupon:params.item.coupon,addons:params.item.addons,variant:{id:params.item.variant.id},payWhatYouWantAmount:params.item.payWhatYouWantAmount}]}):prev.bundles.find(item=>item.id===params.bundle.id)?"Bundle already in cart":{...prev,bundles:[...prev.bundles,{id:params.bundle.id,quantity:1,coupon:params.bundle.coupon}]}}async function canAddVariantToCart({variantId,quantity}){return withErrorHandling(async()=>{let canAddVariantJson=await(await fetch("/api/canAddVariantToCart",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({variantId,quantity})})).json();return console.log("canAddVariantJson",canAddVariantJson),Zod.z.object({result:Zod.z.object({success:Zod.z.literal(!0)}).or(Zod.z.object({success:Zod.z.literal(!1),error:Zod.z.string()}))}).parse(canAddVariantJson).result})??{success:!1,error:"Failed to check if variant can be added to cart"}}async function addItemOrBundleToCartObjectWithValidation({params}){if("item"in params){let newCartResult2=addItemOrBundleToCartObject({params});if(typeof newCartResult2=="string")return newCartResult2;let canAddVariantParsed=await canAddVariantToCart({variantId:params.item.variant.id,quantity:params.item.quantity});return canAddVariantParsed.success?newCartResult2:canAddVariantParsed.error}let newCartResult=addItemOrBundleToCartObject({params});if(typeof newCartResult=="string")return newCartResult;let bundleInNewCart=(await getCartData({localCartStorage:newCartResult})).bundles.find(bundle=>bundle.id===params.bundle.id);if(!bundleInNewCart)return"Failed to find bundle in new cart";let variantIdsInBundle=bundleInNewCart.variants.map(variant=>variant.id),errors=(await Promise.all(variantIdsInBundle.map(async variantId=>canAddVariantToCart({variantId,quantity:1})))).filter(response=>!response.success);return errors.length>0?errors.map(error=>"error"in error?error.error:null).filter(v=>v!==null).join(", "):newCartResult}async function addBundleToCart({bundle}){let newLocalCart=await addItemOrBundleToCartObjectWithValidation({params:{bundle}});return typeof newLocalCart=="string"?newLocalCart:(setLocalCart(newLocalCart),setLayoutCartCount(newLocalCart.bundles.length+newLocalCart.items.length),!0)}async function handleBundleAddToCartClick(card){let bundleIdInput=card.querySelector('input[name="bundleId"]'),couponInput=card.querySelector('input[name="coupon"]'),bundleId=bundleIdInput?.value.trim();if(!bundleId)return console.error("No bundle selected"),!1;let coupon=couponInput?.value.trim()||void 0;isAddingBundleToCart(card,!0);let addToCartResult=await addBundleToCart({bundle:{coupon,id:bundleId}});if(addToCartResult===!0){toast.success("Bundle added to cart"),isAddingBundleToCart(card,!1);return}toast.error(addToCartResult),isAddingBundleToCart(card,!1)}function isAddingBundleToCart(card,value){let bundleAddToCartButton=card.querySelector('button[id="bundle-add-to-cart"]');if(!bundleAddToCartButton){console.error("bundleAddToCartButton not found");return}let loadingSvg=document.createElement("div");loadingSvg.className="animate-spin h-[14px] w-[14px] border border-white/20 border-t-white border-t-2 rounded-full",loadingSvg.id="checkout-button-loading",value?(bundleAddToCartButton.innerHTML="",bundleAddToCartButton.appendChild(loadingSvg)):(bundleAddToCartButton.innerHTML="Add To Cart",document.getElementById("checkout-button-loading")?.remove())}async function entrypoint(){let announcementCloseBtn=document.getElementById("announcement-close-btn"),announcement=document.getElementById("announcement-div");announcementCloseBtn&&announcement&&announcementCloseBtn.addEventListener("click",()=>{announcement.style.display="none"}),document.body.addEventListener("click",async e=>{let htmlElement=e.target;if(htmlElement&&"id"in htmlElement&&htmlElement.id==="bundle-add-to-cart"){let card=htmlElement.closest('[action-name="checkout"]');if(!card)return;await handleBundleAddToCartClick(card)}})}entrypoint(/*!{% endraw %}*/decodeURIComponent(``)/*!{% raw %}*/);
+
+document.querySelectorAll('.about-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+    });
+});
+})();{% endraw %}
+  </script>
+
+  <style>
+    .category-box {
+      border: 1px solid var(--color);
+    }
+
+    .category-box .gradient {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: var(--color);
+      filter: blur(50px);
+      transition: all 0.25s ease-in-out;
+      transform: scale(1) translateY(55%);
+    }
+
+    .category-box:hover .gradient {
+      transform: scale(2) translateY(55%);
+    }
+
+    .products-filter-container {
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+
+      .products-filter-container .product,
+      .products-filter-container .product .product-info {
+        flex-direction: row !important;
+      }
+
+      .products-filter-container .product .purchase {
+        display: inline-flex !important;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .products-filter-container {
+        flex-direction: row !important;
+      }
+
+      .products-filter-container .filter {
+        width: 25% !important;
+      }
+    }
+
+    /* Styles for "Why should you choose us?" section */
+    .about-card {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(20, 20, 20, 0.5);
+      border-radius: 15px;
+      border: 1px solid rgba(128, 128, 255, 0.1);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(400px circle at var(--x) var(--y), #9269FF, transparent);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .about-card:hover::before {
+      opacity: 1;
+    }
+
+    .about-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(128, 128, 255, 0.2);
+      box-shadow: 0 10px 30px rgba(128, 128, 255, 0.15);
+    }
+
+    .about-card>* {
+      position: relative;
+      z-index: 2;
+    }
+
+    .product-btn {
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      /* Use inline-flex for alignment */
+      align-items: center;
+      /* Center content vertically */
+      justify-content: center;
+      /* Center content horizontally */
+      gap: 0.5rem;
+      /* Add gap for icon */
+      font-size: 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+
+    .product-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #8080ff, #6060ff);
+      color: white;
+      flex: 1;
+      font-size: 1rem;
+      box-shadow: 0 5px 15px rgba(128, 128, 255, 0.3);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(128, 128, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .bg-grid-pattern {
+      --color: rgba(114, 114, 114, 0.3);
+      background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent),
+      linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent);
+      background-size: 55px 55px;
+      transition: background-position 0.3s ease;
+    }
+
+    .support-box:hover {
+      box-shadow: 0 0 20px rgba(146, 105, 255, 0.5);
+      border-color: rgba(146, 105, 255, 0.3);
+    }
+
+    .support-box:hover .bg-grid-pattern {
+      animation: scrollGrid 5s linear infinite;
+    }
+
+    @keyframes scrollGrid {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: -55px -55px;
+      }
+    }
+
+    .badge {
+      box-shadow: 0 0 15px rgba(146, 105, 255, 0.5);
+    }
+  </style>
+</div>
