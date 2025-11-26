@@ -529,6 +529,11 @@ document.querySelectorAll('.faq-item').forEach(item => {
       transform: translateY(-3px);
     }
 
+    .faq-item[open] {
+      border-color: rgba(146, 105, 255, 0.4);
+      box-shadow: 0 0 15px rgba(146, 105, 255, 0.1);
+    }
+
     .faq-question {
       padding: 1.5rem;
       cursor: pointer;
@@ -556,7 +561,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
       color: rgba(255, 255, 255, 0.7);
       overflow: hidden;
       max-height: 0;
-      transition: max-height 0.5s cubic-bezier(0.23, 1, 0.32, 1), padding 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     }
   </style>
 </div>
