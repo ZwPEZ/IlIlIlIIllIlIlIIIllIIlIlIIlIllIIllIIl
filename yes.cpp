@@ -17,9 +17,50 @@
 
 #include <stdexcept>
 
+// Forward declarations and dummy implementations for context
+namespace sdk {
+    struct interface_csgo_input {};
+    struct interface_input_system {};
+}
+
+namespace globals {
+    bool menu_opened = true; // Default to true as per user description
+    bool relative_mouse_mode = true;
+	bool should_exit = false;
+}
+
+namespace hooks {
+	// For hook_set_relative_mouse_mode
+    using set_relative_mouse_mode_t = void*(__fastcall*)(sdk::interface_input_system*, bool);
+    set_relative_mouse_mode_t original_set_relative_mouse_mode = nullptr;
+
+	// For hook_mouse_input_enabled
+	using mouse_input_enabled_t = bool(__fastcall*)(sdk::interface_csgo_input*);
+    mouse_input_enabled_t original_mouse_input_enabled = nullptr;
+}
+
+namespace interfaces {
+	// Dummy pointers to satisfy compiler
+	void* d3d11_device = (void*)1;
+	void* d3d11_device_context = (void*)1;
+	HWND hwnd = (HWND)1;
+	sdk::interface_input_system* input_system = nullptr;
+}
+
 static WNDPROC original_wndproc = nullptr;
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+bool __fastcall hook_mouse_input_enabled(sdk::interface_csgo_input* csgo_input) {
+	return globals::menu_opened ? false : hooks::original_mouse_input_enabled(csgo_input);
+}
+
+void* __fastcall hook_set_relative_mouse_mode(sdk::interface_input_system* input_system, bool enabled) {
+	if (!globals::menu_opened) {
+		globals::relative_mouse_mode = enabled;
+	}
+	return hooks::original_set_relative_mouse_mode(input_system, globals::menu_opened ? false : enabled);
+}
 
 LRESULT __stdcall hook_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if (msg == WM_KEYDOWN && wparam == VK_INSERT) {
