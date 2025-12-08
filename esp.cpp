@@ -60,8 +60,11 @@ void ESP::RenderESP()
 		}
 
 		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Collision);
-		Vec3 min = *(Vec3*)(collision + 0x40);
-		Vec3 max = *(Vec3*)(collision + 0x4C);
+		if (!collision) {
+			continue;
+		}
+		Vec3 min = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
+		Vec3 max = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
 
 		Vec3 feetPos = *(Vec3*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin);
 		Vec3 headPos = { feetPos.x, feetPos.y, feetPos.z + max.z };
