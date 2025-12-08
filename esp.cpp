@@ -59,28 +59,52 @@ void ESP::RenderESP()
 			continue;
 		}
 
-		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Collision);
-		if (!collision) {
+		uintptr_t gameSceneNode = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
+		if (!gameSceneNode) {
 			continue;
 		}
+
+		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Collision);
+		if (!collision)
+		{
+			continue;
+		}
+
+		Vec3 origin = *(Vec3*)(gameSceneNode + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin);
 		Vec3 min = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
 		Vec3 max = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
 
-		Vec3 feetPos = *(Vec3*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin);
-		Vec3 headPos = { feetPos.x, feetPos.y, feetPos.z + max.z };
-		feetPos = { feetPos.x, feetPos.y, feetPos.z + min.z };
+		float minX = FLT_MAX, minY = FLT_MAX, maxX = -FLT_MAX, maxY = -FLT_MAX;
+		bool anyPointOnScreen = false;
 
-		Vec2 feet, head;
+		for (int i = 0; i < 8; i++)
+		{
+			Vec3 point;
+			point.x = (i & 1) ? min.x : max.x;
+			point.y = (i & 2) ? min.y : max.y;
+			point.z = (i & 4) ? min.z : max.z;
 
-		if (feetPos.WorldToScreen(feet, ViewMatrix) && headPos.WorldToScreen(head, ViewMatrix)) {
+			point = point + origin;
+
+			Vec2 screenPoint;
+
+			if (point.WorldToScreen(screenPoint, ViewMatrix))
+			{
+				anyPointOnScreen = true;
+				if (minX > screenPoint.x)
+					minX = screenPoint.x;
+				if (minY > screenPoint.y)
+					minY = screenPoint.y;
+				if (maxX < screenPoint.x)
+					maxX = screenPoint.x;
+				if (maxY < screenPoint.y)
+					maxY = screenPoint.y;
+			}
+		}
+
+		if (anyPointOnScreen) {
 			auto draw = ImGui::GetBackgroundDrawList();
-
-			float height = (feet.y - head.y);
-			float width = height / 2.0f;
-			float x = head.x - (width / 2);
-			float y = head.y;
-
-			draw->AddRect({ x, y }, { x + width, y + height }, IM_COL32(255, 255, 255, 255), 0.0f, 0, 1.0f);
+			draw->AddRect({ minX, minY }, { maxX, maxY }, IM_COL32(255, 255, 255, 255));
 		}
     }
 }
