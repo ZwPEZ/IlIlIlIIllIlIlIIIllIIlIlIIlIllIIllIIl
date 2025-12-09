@@ -60,9 +60,12 @@ void ESP::RenderESP()
 		}
 
 		Vec3 origin = *(Vec3*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin);
-		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pCollision);
-		Vec3 mins = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
-		Vec3 maxs = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
+		uintptr_t collisionPtr = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Collision);
+		if (!collisionPtr) {
+			continue;
+		}
+		Vec3 mins = *(Vec3*)(collisionPtr + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
+		Vec3 maxs = *(Vec3*)(collisionPtr + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
 
 		Vec3 bottom = origin + mins;
 		Vec3 top = origin + maxs;
