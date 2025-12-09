@@ -59,52 +59,30 @@ void ESP::RenderESP()
 			continue;
 		}
 
-		uintptr_t gameSceneNode = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pGameSceneNode);
-		if (!gameSceneNode) {
-			continue;
-		}
+		Vec3 origin = *(Vec3*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_vOldOrigin);
+		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseEntity::m_pCollision);
+		Vec3 mins = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
+		Vec3 maxs = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
 
-		uintptr_t collision = *(uintptr_t*)(pCSPlayerPawnPointer + cs2_dumper::schemas::client_dll::C_BaseModelEntity::m_Collision);
-		if (!collision)
-		{
-			continue;
-		}
+		Vec3 bottom = origin + mins;
+		Vec3 top = origin + maxs;
 
-		Vec3 origin = *(Vec3*)(gameSceneNode + cs2_dumper::schemas::client_dll::CGameSceneNode::m_vecAbsOrigin);
-		Vec3 min = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMins);
-		Vec3 max = *(Vec3*)(collision + cs2_dumper::schemas::client_dll::CCollisionProperty::m_vecMaxs);
+		Vec2 bottomScreen, topScreen;
+		if (bottom.WorldToScreen(bottomScreen, ViewMatrix) && top.WorldToScreen(topScreen, ViewMatrix)) {
+			float height = (bottomScreen.y - topScreen.y) * 1.0f; // can change height
+			float width = height / 1.8f; // can change width
 
-		float minX = FLT_MAX, minY = FLT_MAX, maxX = -FLT_MAX, maxY = -FLT_MAX;
-		bool anyPointOnScreen = false;
+			float centerX = (topScreen.x + bottomScreen.x) / 2.0f;
+			float x = centerX - width / 2.0f;
 
-		for (int i = 0; i < 8; i++)
-		{
-			Vec3 point;
-			point.x = (i & 1) ? min.x : max.x;
-			point.y = (i & 2) ? min.y : max.y;
-			point.z = (i & 4) ? min.z : max.z;
-
-			point = point + origin;
-
-			Vec2 screenPoint;
-
-			if (point.WorldToScreen(screenPoint, ViewMatrix))
-			{
-				anyPointOnScreen = true;
-				if (minX > screenPoint.x)
-					minX = screenPoint.x;
-				if (minY > screenPoint.y)
-					minY = screenPoint.y;
-				if (maxX < screenPoint.x)
-					maxX = screenPoint.x;
-				if (maxY < screenPoint.y)
-					maxY = screenPoint.y;
-			}
-		}
-
-		if (anyPointOnScreen) {
-			auto draw = ImGui::GetBackgroundDrawList();
-			draw->AddRect({ minX, minY }, { maxX, maxY }, IM_COL32(255, 255, 255, 255));
+			ImGui::GetBackgroundDrawList()->AddRect(
+				{ x, topScreen.y },
+				{ x + width, topScreen.y + height },
+				IM_COL32(255, 255, 255, 255),
+				0.0f,
+				0,
+				1.0f
+			);
 		}
     }
 }
