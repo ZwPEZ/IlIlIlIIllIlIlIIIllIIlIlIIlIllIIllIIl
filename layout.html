@@ -1,21 +1,42 @@
 <div class="dark bg-background text-white relative !scroll-smooth font-geist">
   <!-- HeaderBar -->
+  <style>
+    @keyframes move-gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .header-line {
+      display: none;
+      height: 1px;
+      background: linear-gradient(to right, var(--accent-color), var(--dark-accent-color), var(--accent-color));
+      background-size: 200% 200%;
+      animation: move-gradient 4s linear infinite;
+    }
+    #headerBar.scrolled .header-line {
+      display: block;
+    }
+    #headerBar.scrolled {
+      background-color: rgba(20, 20, 20, 0.7);
+      backdrop-filter: blur(12px);
+    }
+  </style>
   <div id="headerBar" class="mx-auto w-full sticky top-0 z-50 transition-colors duration-300">
     <nav class="mx-auto max-w-[1120px] flex flex-row justify-between items-center px-4 py-4">
       <a href="/">
         <div class="flex flex-row items-center gap-2 w-fit md:min-w-[203px]">
           <fade-in-image alt="website logo" src="{{ image }}"
             class="h-8 w-8 rounded-full object-contain"></fade-in-image>
-          <span class="text-xl font-bold hidden sm:inline-block">
+          <span class="text-xl font-bold hidden sm:inline-block transition-all hover:[text-shadow:0_0_8px_white]">
             {{ name }}
           </span>
         </div>
       </a>
       <div class="hidden flex-row items-center gap-1 md:flex">
-        <link-button href="/tos" class="text-xs transition-all hover:text-[--accent-color] hover:[text-shadow:0_0_8px_var(--accent-color)]" data-id="000001" data-label="Terms"
+        <link-button href="/tos" class="text-xs transition-all text-white/70 hover:text-transparent hover:[text-shadow:0_0_8px_white]" data-id="000001" data-label="Terms"
           data-variant="ghost" data-href="">Terms</link-button>
 
-        <link-button href="/reviews" class="text-xs transition-all hover:text-[--accent-color] hover:[text-shadow:0_0_8px_var(--accent-color)]" data-id="000002" data-label="Reviews"
+        <link-button href="/reviews" class="text-xs transition-all text-white/70 hover:text-transparent hover:[text-shadow:0_0_8px_white]" data-id="000002" data-label="Reviews"
           data-variant="ghost" data-href="">Reviews</link-button>
       </div>
       <div class="flex flex-row items-center gap-4">
@@ -36,7 +57,7 @@
         </a>
 
         <link-button href="/order"
-          class="hidden md:flex text-xs space-x-2 bg-gradient-to-r from-[--accent-color] to-[--dark-accent-color] animate-pulse hover:animate-none" data-id="000003"
+          class="hidden md:flex text-xs space-x-2 bg-gradient-to-r from-[--accent-color] to-[--dark-accent-color] transition-all hover:shadow-[0_0_12px_var(--accent-color)]" data-id="000003"
           data-label="Customer Login" data-variant="default" data-href="">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -51,6 +72,7 @@
           class="md:hidden inline-block px-2.5 py-2.5 hover:bg-white/10 rounded-md"></header-bar-sidebar-btn>
       </div>
     </nav>
+    <div class="header-line"></div>
   </div>
   <!-- Social Icons -->
   {% assign arr = socials %}
@@ -179,12 +201,10 @@
 
     // Function to check scroll position and update navbar background
     function updateNavbarBackground() {
-      if (window.scrollY === 0) {
-        // At the top: make background transparent
-        navbar.classList.remove('backdrop-blur-md', 'bg-black/10');
+      if (window.scrollY > 0) {
+        navbar.classList.add('scrolled');
       } else {
-        // Scrolled down: restore original background
-        navbar.classList.add('backdrop-blur-md', 'bg-black/10');
+        navbar.classList.remove('scrolled');
       }
     }
 
