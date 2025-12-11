@@ -410,7 +410,7 @@ document.querySelectorAll('.faq-question').forEach(question => {
       border-radius: inherit;
       background: radial-gradient(300px circle at var(--x) var(--y), rgba(146, 105, 255, 0.4), transparent);
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
     }
 
     .about-card:hover::before {
@@ -456,9 +456,9 @@ document.querySelectorAll('.faq-question').forEach(question => {
       left: 50%;
       width: 0;
       height: 0;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(146, 105, 255, 0.2);
       border-radius: 50%;
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
       transform: translate(-50%, -50%);
     }
 
@@ -574,14 +574,14 @@ document.querySelectorAll('.faq-question').forEach(question => {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 150%;
-      padding-bottom: 150%;
-      background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 70%);
+      width: 160%;
+      padding-bottom: 160%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 70%);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       z-index: -1;
-      opacity: 0.9;
-      filter: blur(25px);
+      opacity: 1;
+      filter: blur(35px);
     }
 
     /* --- New FAQ Section Styles --- */
@@ -631,6 +631,8 @@ document.querySelectorAll('.faq-question').forEach(question => {
       align-items: center;
       font-weight: 600;
       color: #fff;
+      position: relative;
+      z-index: 2;
     }
 
     .faq-answer {
@@ -638,6 +640,8 @@ document.querySelectorAll('.faq-question').forEach(question => {
       overflow: hidden;
       transition: max-height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1.0);
       color: rgba(255, 255, 255, 0.7);
+      position: relative;
+      z-index: 2;
     }
 
     .faq-answer p {
