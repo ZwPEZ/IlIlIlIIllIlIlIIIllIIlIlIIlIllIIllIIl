@@ -301,7 +301,7 @@
   <script key="indexPage-script">
     {% raw %}"use strict";(()=>{function setLayoutCartCount(cartCount){let cartCountSpan=document.getElementById("cart-count");cartCountSpan&&(cartCountSpan.innerText=cartCount.toString())}function withErrorHandling(fn){try{return fn()}catch(e){console.error(e)}}async function getCartData({localCartStorage}){return withErrorHandling(async()=>{let cartResponse=await fetch("/api/getCart",{method:"POST",body:JSON.stringify(localCartStorage)});if(!cartResponse.ok)throw new Error("Failed to fetch cart");return await cartResponse.json()})??{items:[],bundles:[]}}function addItemOrBundleToCartObject({params}){let prev={...localCart};return"item"in params?(console.log(prev.items),prev.items.find(item=>item.variant.id===params.item.variant.id)?"Item already in cart":{...prev,items:[...prev.items,{id:params.item.id,quantity:params.item.quantity,coupon:params.item.coupon,addons:params.item.addons,variant:{id:params.item.variant.id},payWhatYouWantAmount:params.item.payWhatYouWantAmount}]}):prev.bundles.find(item=>item.id===params.bundle.id)?"Bundle already in cart":{...prev,bundles:[...prev.bundles,{id:params.bundle.id,quantity:1,coupon:params.bundle.coupon}]}}async function canAddVariantToCart({variantId,quantity}){return withErrorHandling(async()=>{let canAddVariantJson=await(await fetch("/api/canAddVariantToCart",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({variantId,quantity})})).json();return console.log("canAddVariantJson",canAddVariantJson),Zod.z.object({result:Zod.z.object({success:Zod.z.literal(!0)}).or(Zod.z.object({success:Zod.z.literal(!1),error:Zod.z.string()}))}).parse(canAddVariantJson).result})??{success:!1,error:"Failed to check if variant can be added to cart"}}async function addItemOrBundleToCartObjectWithValidation({params}){if("item"in params){let newCartResult2=addItemOrBundleToCartObject({params});if(typeof newCartResult2=="string")return newCartResult2;let canAddVariantParsed=await canAddVariantToCart({variantId:params.item.variant.id,quantity:params.item.quantity});return canAddVariantParsed.success?newCartResult2:canAddVariantParsed.error}let newCartResult=addItemOrBundleToCartObject({params});if(typeof newCartResult=="string")return newCartResult;let bundleInNewCart=(await getCartData({localCartStorage:newCartResult})).bundles.find(bundle=>bundle.id===params.bundle.id);if(!bundleInNewCart)return"Failed to find bundle in new cart";let variantIdsInBundle=bundleInNewCart.variants.map(variant=>variant.id),errors=(await Promise.all(variantIdsInBundle.map(async variantId=>canAddVariantToCart({variantId,quantity:1})))).filter(response=>!response.success);return errors.length>0?errors.map(error=>"error"in error?error.error:null).filter(v=>v!==null).join(", "):newCartResult}async function addBundleToCart({bundle}){let newLocalCart=await addItemOrBundleToCartObjectWithValidation({params:{bundle}});return typeof newLocalCart=="string"?newLocalCart:(setLocalCart(newLocalCart),setLayoutCartCount(newLocalCart.bundles.length+newLocalCart.items.length),!0)}async function handleBundleAddToCartClick(card){let bundleIdInput=card.querySelector('input[name="bundleId"]'),couponInput=card.querySelector('input[name="coupon"]'),bundleId=bundleIdInput?.value.trim();if(!bundleId)return console.error("No bundle selected"),!1;let coupon=couponInput?.value.trim()||void 0;isAddingBundleToCart(card,!0);let addToCartResult=await addBundleToCart({bundle:{coupon,id:bundleId}});if(addToCartResult===!0){toast.success("Bundle added to cart"),isAddingBundleToCart(card,!1);return}toast.error(addToCartResult),isAddingBundleToCart(card,!1)}function isAddingBundleToCart(card,value){let bundleAddToCartButton=card.querySelector('button[id="bundle-add-to-cart"]');if(!bundleAddToCartButton){console.error("bundleAddToCartButton not found");return}let loadingSvg=document.createElement("div");loadingSvg.className="animate-spin h-[14px] w-[14px] border border-white/20 border-t-white border-t-2 rounded-full",loadingSvg.id="checkout-button-loading",value?(bundleAddToCartButton.innerHTML="",bundleAddToCartButton.appendChild(loadingSvg)):(bundleAddToCartButton.innerHTML="Add To Cart",document.getElementById("checkout-button-loading")?.remove())}async function entrypoint(){let announcementCloseBtn=document.getElementById("announcement-close-btn"),announcement=document.getElementById("announcement-div");announcementCloseBtn&&announcement&&announcementCloseBtn.addEventListener("click",()=>{announcement.style.display="none"}),document.body.addEventListener("click",async e=>{let htmlElement=e.target;if(htmlElement&&"id"in htmlElement&&htmlElement.id==="bundle-add-to-cart"){let card=htmlElement.closest('[action-name="checkout"]');if(!card)return;await handleBundleAddToCartClick(card)}})}entrypoint(/*!{% endraw %}*/decodeURIComponent(``)/*!{% raw %}*/);
 
-document.querySelectorAll('.about-card').forEach(card => {
+document.querySelectorAll('.about-card, .faq-item').forEach(card => {
     card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -468,17 +468,17 @@ document.querySelectorAll('.faq-question').forEach(question => {
     }
 
     .btn-download {
-      background: linear-gradient(135deg, #8080ff, #6060ff);
+      background: linear-gradient(135deg, #9269FF, #7A53CC);
       color: white;
       flex: 1;
       font-size: 1rem;
-      box-shadow: 0 5px 15px rgba(128, 128, 255, 0.3);
-      transition: all 0.3s ease; /* Add transition */
+      box-shadow: 0 5px 20px rgba(146, 105, 255, 0.4);
+      transition: all 0.3s ease;
     }
 
     .btn-download:hover {
-      transform: translateY(-2px) scale(1.05); /* Add scale on hover */
-      box-shadow: 0 8px 25px rgba(128, 128, 255, 0.5); /* Enhance shadow on hover */
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(146, 105, 255, 0.6);
     }
 
     .btn-secondary {
@@ -574,32 +574,48 @@ document.querySelectorAll('.faq-question').forEach(question => {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 120%;
-      padding-bottom: 120%;
-      background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 70%);
+      width: 150%;
+      padding-bottom: 150%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 70%);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       z-index: -1;
-      opacity: 0.7;
-      filter: blur(15px);
+      opacity: 0.9;
+      filter: blur(25px);
     }
 
     /* --- New FAQ Section Styles --- */
     #faq {
-      background: #0a0a0a;
+      background: transparent;
     }
 
     .faq-item {
-      background-color: #0a0a0a;
+      background: rgba(20, 20, 20, 0.5);
       border: 1px solid rgba(128, 128, 255, 0.1);
-      border-radius: 12px;
+      border-radius: 15px;
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+
+    .faq-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(300px circle at var(--x) var(--y), rgba(146, 105, 255, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .faq-item:hover::before {
+      opacity: 1;
     }
 
     .faq-item:hover {
-      border-color: rgba(128, 128, 255, 0.3);
-      transform: translateY(-2px);
+      border-color: rgba(128, 128, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(128, 128, 255, 0.1);
     }
 
     .faq-item.active {
