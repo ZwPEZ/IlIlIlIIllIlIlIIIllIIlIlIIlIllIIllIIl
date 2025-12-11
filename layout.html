@@ -1,8 +1,8 @@
 <div class="dark bg-background text-white relative !scroll-smooth font-geist">
   <!-- HeaderBar -->
-  <div id="headerBar" class="mx-auto w-full sticky top-0 z-50 backdrop-blur-md bg-white/[0.05]">
+  <div id="headerBar" class="mx-auto w-full sticky top-0 z-50 backdrop-blur-md bg-white/[0.05] transition-colors duration-300">
     <nav class="mx-auto max-w-[1120px] flex flex-row justify-between items-center px-4 py-4">
-      <a href="/">
+      <a href="/" class="transition-transform duration-300 hover:scale-105">
         <div class="flex flex-row items-center gap-2 w-fit md:min-w-[203px]">
           <fade-in-image alt="website logo" src="{{ image }}"
             class="h-8 w-8 rounded-full object-contain"></fade-in-image>
@@ -12,16 +12,16 @@
         </div>
       </a>
       <div class="hidden flex-row items-center gap-1 md:flex">
-        <link-button href="/tos" class="text-xs hover:text-[--accent-color]" data-id="000001" data-label="Terms"
+        <link-button href="/tos" class="text-xs px-4 py-2 rounded-md transition-colors duration-300 hover:bg-white/10" data-id="000001" data-label="Terms"
           data-variant="ghost" data-href="">Terms</link-button>
 
-        <link-button href="/reviews" class="text-xs hover:text-[--accent-color]" data-id="000002" data-label="Reviews"
+        <link-button href="/reviews" class="text-xs px-4 py-2 rounded-md transition-colors duration-300 hover:bg-white/10" data-id="000002" data-label="Reviews"
           data-variant="ghost" data-href="">Reviews</link-button>
       </div>
       <div class="flex flex-row items-center gap-4">
         <currency-selector class="bg-white/10 hover:bg-white/25 border-transparent"></currency-selector>
         <a href="/payment"
-          class="flex duration-500 justify-center items-center gap-3 rounded-md text-xl px-3 py-2.5 bg-white/10 hover:bg-white/25 relative">
+          class="flex duration-500 justify-center items-center gap-3 rounded-md text-xl px-3 py-2.5 bg-white/10 hover:bg-white/25 relative transition-transform duration-300 hover:scale-110">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-shopping-cart">
@@ -36,7 +36,7 @@
         </a>
 
         <link-button href="/order"
-          class="hidden md:flex text-xs space-x-2 bg-[--accent-color] hover:bg-[--dark-accent-color]" data-id="000003"
+          class="hidden md:flex text-xs space-x-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 transition-colors duration-300" data-id="000003"
           data-label="Customer Login" data-variant="default" data-href="">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
