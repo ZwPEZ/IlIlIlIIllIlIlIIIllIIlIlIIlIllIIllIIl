@@ -117,8 +117,70 @@
       {%- endif %}
       <!-- Why should you choose us? -->
       {% render "indexPage/howItWorks" %}
-      <!-- FAQ section -->
-      {% render "indexPage/faq" %}
+      <!-- FAQ Section -->
+      <div id="faq" class="py-12 sm:py-16 lg:py-20 text-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center gap-2 px-4">
+          <div class="relative text-blue-500">
+            <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
+            <div class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" x2="12.01" y1="17" y2="17"></line>
+              </svg>
+              FAQ
+            </div>
+          </div>
+          <h2 class="text-center text-3xl sm:text-4xl font-bold">Frequently Asked Questions</h2>
+          <p class="max-w-xl text-center text-xs text-muted-foreground">
+            Here are some of the most common questions we get.
+          </p>
+        </div>
+
+        <div class="mt-12 max-w-4xl mx-auto">
+          <div class="space-y-4">
+            <!-- FAQ Item 1 -->
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>Can I make payments using my preferred method?</span>
+                <div class="faq-icon">
+                  <span class="icon-plus"></span>
+                  <span class="icon-minus"></span>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Yes. We support a wide range of payment methods including major cards and various cryptocurrencies—choose what’s most convenient for you.</p>
+              </div>
+            </div>
+            <!-- FAQ Item 2 -->
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>Is it safe to make payments?</span>
+                <div class="faq-icon">
+                  <span class="icon-plus"></span>
+                  <span class="icon-minus"></span>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Absolutely. We use secure checkout and advanced fraud prevention. Sensitive payment data is not stored on our servers.</p>
+              </div>
+            </div>
+            <!-- FAQ Item 3 -->
+            <div class="faq-item">
+              <div class="faq-question">
+                <span>How do I make a purchase?</span>
+                <div class="faq-icon">
+                  <span class="icon-plus"></span>
+                  <span class="icon-minus"></span>
+                </div>
+              </div>
+              <div class="faq-answer">
+                <p>Browse products, add to cart, and proceed to checkout. After payment, you’ll receive instant access and instructions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </vertical-layout>
   </slot>
   <script key="indexPage-script">
@@ -147,31 +209,20 @@ if (supportBox) {
   });
 }
 
-// --- Rewritten FAQ Accordion Logic ---
-document.querySelectorAll('.faq-item').forEach(details => {
-  const summary = details.querySelector('.faq-question');
-  const answer = details.querySelector('.faq-answer');
+// --- FAQ Accordion Logic ---
+document.querySelectorAll('.faq-question').forEach(question => {
+  question.addEventListener('click', () => {
+    const faqItem = question.parentElement;
+    const answer = faqItem.querySelector('.faq-answer');
 
-  summary.addEventListener('click', (event) => {
-    // Prevent the default <details> toggling to take control of the animation
-    event.preventDefault();
+    // Toggle the 'active' class on the clicked item
+    faqItem.classList.toggle('active');
 
-    if (details.open) {
-      // --- Start closing animation ---
-      answer.style.maxHeight = '0px';
-
-      // Wait for the animation to finish before closing the <details> element
-      setTimeout(() => {
-        details.open = false;
-      }, 500); // This duration should match the CSS transition time
+    // Set the max-height for the animation
+    if (faqItem.classList.contains('active')) {
+      answer.style.maxHeight = answer.scrollHeight + 'px';
     } else {
-      // --- Start opening animation ---
-      details.open = true;
-      // By using requestAnimationFrame, we wait for the browser to paint the 'open'
-      // state before we calculate the scrollHeight. This prevents a layout jump.
-      requestAnimationFrame(() => {
-        answer.style.maxHeight = `${answer.scrollHeight}px`;
-      });
+      answer.style.maxHeight = '0px';
     }
   });
 });
@@ -402,69 +453,83 @@ document.querySelectorAll('.faq-item').forEach(details => {
       text-shadow: 0 0 8px rgba(146, 105, 255, 0.6);
     }
 
-    /* FAQ section styles */
+    /* --- New FAQ Section Styles --- */
     #faq {
       background: #0a0a0a;
     }
 
     .faq-item {
-      background: rgba(20, 20, 20, 0.5);
-      border-radius: 15px;
+      background: #141414;
       border: 1px solid rgba(128, 128, 255, 0.1);
-      /* SPECIFIC TRANSITIONS: Prevents unwanted animation on properties like width/height */
-      transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
+      border-radius: 12px;
       overflow: hidden;
-      width: 100%;
-      box-sizing: border-box;
-      display: block;
+      transition: all 0.3s ease;
     }
 
     .faq-item:hover {
-      border-color: rgba(128, 128, 255, 0.2);
-      transform: translateY(-3px);
+      border-color: rgba(128, 128, 255, 0.3);
+      transform: translateY(-2px);
     }
 
-    .faq-item[open] {
-      border-color: rgba(146, 105, 255, 0.4);
-      box-shadow: 0 0 15px rgba(146, 105, 255, 0.1);
+    .faq-item.active {
+      border-color: rgba(146, 105, 255, 0.5);
+      box-shadow: 0 0 25px rgba(146, 105, 255, 0.1);
     }
 
     .faq-question {
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-weight: 600;
-      position: relative;
-    }
-
-    .faq-question::-webkit-details-marker {
-      display: none;
-    }
-
-    .faq-arrow {
-      transition: transform 0.3s ease;
-    }
-
-    .faq-item[open] .faq-arrow {
-      transform: rotate(180deg);
+      color: #fff;
     }
 
     .faq-answer {
-      color: rgba(255, 255, 255, 0.7);
-      overflow: hidden;
       max-height: 0;
-      /* Animate only the max-height for a smooth slide-down effect */
-      transition: max-height 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      will-change: max-height;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    /* The content inside the answer panel now holds the padding. */
-    /* This ensures the padding doesn't animate, providing a stable layout. */
     .faq-answer p {
-      padding: 0 1.5rem 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.25rem;
+      margin: 0;
+    }
+
+    .faq-icon {
+      width: 24px;
+      height: 24px;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .icon-plus, .icon-minus {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 2px;
+      background-color: #fff;
+      transition: transform 0.3s ease, opacity 0.2s ease;
+    }
+
+    .icon-plus {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    .icon-minus {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    .faq-item.active .icon-plus {
+      transform: translate(-50%, -50%) rotate(0deg);
+      opacity: 0;
+    }
+
+    .faq-item.active .icon-minus {
+      transform: translate(-50%, -50%) rotate(0deg);
     }
   </style>
 </div>
