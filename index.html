@@ -167,10 +167,11 @@ document.querySelectorAll('.faq-item').forEach(details => {
     } else {
       // --- Start opening animation ---
       details.open = true;
-
-      // Set max-height to the full scroll height of the answer
-      // This allows the CSS transition to expand the element smoothly
-      answer.style.maxHeight = `${answer.scrollHeight}px`;
+      // By using requestAnimationFrame, we wait for the browser to paint the 'open'
+      // state before we calculate the scrollHeight. This prevents a layout jump.
+      requestAnimationFrame(() => {
+        answer.style.maxHeight = `${answer.scrollHeight}px`;
+      });
     }
   });
 });
