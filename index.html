@@ -417,6 +417,7 @@ document.querySelectorAll('.faq-item').forEach(details => {
       overflow: hidden;
       width: 100%;
       box-sizing: border-box;
+      display: block;
     }
 
     .faq-item:hover {
@@ -457,6 +458,7 @@ document.querySelectorAll('.faq-item').forEach(details => {
       max-height: 0;
       /* Animate only the max-height for a smooth slide-down effect */
       transition: max-height 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: max-height;
     }
 
     /* The content inside the answer panel now holds the padding. */
