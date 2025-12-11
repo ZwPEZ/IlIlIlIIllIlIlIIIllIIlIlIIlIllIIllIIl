@@ -1,686 +1,191 @@
-<div class="bg-cover bg-center mx-auto w-full px-4 !scroll-smooth relative">
-  {% if announcement.length > 1 %}
-  <div id="announcement-div"
-    class="fade-out fixed top-20 right-2 bg-[#0a0a0a] p-4 rounded-md z-30 shadow-md border sm:max-w-sm max-w-[300px]">
-    <div id="announcement-close-btn" class="absolute top-1 right-1 cursor-pointer">
-      <svg width="16" height="16" viewBox="0 0 24 24" data-name="Line Color" xmlns="http://www.w3.org/2000/svg"
-        class="icon line-color">
-        <path style="fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2" d="M19 19 5 5" />
-        <path data-name="primary"
-          style="fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-width:2" d="M19 5 5 19" />
-      </svg>
-    </div>
-    <format-markdown content="{{ announcement | escape }}"></format-markdown>
-  </div>
-  {% endif %}
-  <slot data-id="1" class="min-h-[100px]">
-    <vertical-layout data-id="2a4a9a67-7276-4e3b-a150-1a03ab0fceed" data-slots="5"
-      style="gap: 24px; align-items: center; justify-content: start" data-spacing="36" data-align-items="center"
-      class="pt-4" data-justify-items="start">
-      {% render "indexPage/header"
-      , productsSold: productsSold
-      , averageRating: averageRating
-      , image: image
-      , backgroundImage: backgroundImage
-      , name: name %}
-      <!-- Featured Products -->
-      {% if isAnyProductFeatured %}
-      {% render "indexPage/featuredProducts"
-      , productsOrGroups: productsOrGroups %}
-      {%- endif %}
-      <!-- Our Products -->
-
-      <div class="w-full relative">
-        <div class="flex flex-col items-center pt-12 z-10 relative" id="products-list">
-          <div class="flex flex-col items-center gap-2 px-4">
-            <div class="relative text-blue-500">
-              <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
-              <div
-                class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="lucide lucide-smile-plus">
-                  <path d="M22 11v1a10 10 0 1 1-9-10"></path>
-                  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                  <line x1="9" x2="9.01" y1="9" y2="9"></line>
-                  <line x1="15" x2="15.01" y1="9" y2="9"></line>
-                  <path d="M16 5h6"></path>
-                  <path d="M19 2v6"></path>
-                </svg>
-                Best Seller
-              </div>
-            </div>
-            <h2 class="text-center text-3xl font-semibold">Best Seller Products</h2>
-            <p class="max-w-xl text-center text-xs text-muted-foreground">Products that are loved by our customers</p>
-          </div>
+<div class="dark bg-background text-white relative !scroll-smooth font-geist">
+  <!-- HeaderBar -->
+  <div id="headerBar" class="mx-auto w-full sticky top-0 z-50 backdrop-blur-md bg-white/[0.05]">
+    <nav class="mx-auto max-w-[1120px] flex flex-row justify-between items-center px-4 py-4">
+      <a href="/">
+        <div class="flex flex-row items-center gap-2 w-fit md:min-w-[203px]">
+          <fade-in-image alt="website logo" src="{{ image }}"
+            class="h-8 w-8 rounded-full object-contain"></fade-in-image>
+          <span class="text-xl font-bold hidden sm:inline-block">
+            {{ name }}
+          </span>
         </div>
-
-        <slot data-id="ccecc470-9d14-4065-8d11-7cb4df6110a3" class="w-full">
-          <div class="relative w-full">
-            {% assign arr = productsOrGroups %}
-            <div id="products"
-              class="relative mx-auto mt-10 grid w-fit grid-flow-row gap-6 px-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {%- for product in arr %}
-              {% if product.isGroup == false %}
-              <!-- Product Card -->
-              {% render "indexPage/productCard"
-              , product: product %}
-
-              {% else %}
-              <!-- Grouped Product -->
-              {% render "indexPage/productGroupCard"
-              , product: product %}
-              {% endif %}
-              {%- endfor %}
-            </div>
-          </div>
-        </slot>
-      </div>
-
-      <!-- Our Bundles -->
-      {% if bundles.length > 0 %}
-      <div class="flex flex-col items-center pt-12">
-        <div class="flex flex-col items-center gap-2 px-4">
-          <div class="relative text-blue-500">
-            <div class="absolute h-full w-full  bg-[--accent-color] opacity-10 rounded-md"></div>
-            <div
-              class="whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-group">
-                <path d="M3 7V5c0-1.1.9-2 2-2h2" />
-                <path d="M17 3h2c1.1 0 2 .9 2 2v2" />
-                <path d="M21 17v2c0 1.1-.9 2-2 2h-2" />
-                <path d="M7 21H5c-1.1 0-2-.9-2-2v-2" />
-                <rect width="7" height="5" x="7" y="7" rx="1" />
-                <rect width="7" height="5" x="10" y="12" rx="1" />
-              </svg>
-              Popular Bundle
-            </div>
-          </div>
-          <h2 class="text-center text-3xl font-semibold">Popular Bundles</h2>
-          <p class="max-w-xl text-center text-xs text-muted-foreground">Bundles curated to suit your needs</p>
-        </div>
-      </div>
-
-      <slot data-id="ccecc470-9d14-4065-8d11-7cb4df6110a3" class="w-full">
-        {% assign arr = bundles %}
-        <div id="bundles"
-          class="relative mx-auto mt-10 grid w-fit grid-flow-row gap-6 px-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {%- for bundle in arr %}
-          <!-- Bundle Card -->
-          {% render "indexPage/bundleCard"
-          , bundle: bundle %}
-          {%- endfor %}
-        </div>
-      </slot>
-      {%- endif %}
-      <!-- Why should you choose us? -->
-      <div id="why-choose-us" class="py-12 sm:py-16 lg:py-20 text-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="flex flex-col items-center gap-2 px-4">
-    <div class="relative text-blue-500">
-      <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
-      <div
-        class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-shield-check">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          <path d="m9 12 2 2 4-4"></path>
-        </svg>
-        Why Us?
-      </div>
-    </div>
-    <h2 class="text-center text-3xl sm:text-4xl font-bold">Why should you choose us?</h2>
-    <p class="max-w-xl text-center text-xs text-muted-foreground">Experience unparalleled service with our
-      dedicated team, always ready to assist with any of your needs. Our mission is to simplify your life.</p>
-  </div>
-
-  <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-    <!-- Top row -->
-    <div class="about-card">
-      <div class="flex justify-center items-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-truck">
-          <path d="M10 17h4V5H2v12h3" />
-          <path d="M10 17h4V5H2v12h3" />
-          <path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h6Z" />
-          <circle cx="7.5" cy="17.5" r="2.5" />
-          <circle cx="17.5" cy="17.5" r="2.5" />
-        </svg>
-      </div>
-      <h3 class="text-xl font-semibold mb-2">Instant Delivery</h3>
-      <p class="text-muted-foreground/70 text-center">
-        Product keys are instantly delivered to your email.
-      </p>
-    </div>
-
-    <div class="about-card">
-      <div class="flex justify-center items-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-shield-check">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <path d="m9 12 2 2 4-4" />
-        </svg>
-      </div>
-      <h3 class="text-xl font-semibold mb-2">Safe & Quality</h3>
-      <p class="text-muted-foreground/70 text-center">
-        We provide you with the safest, highest-quality premium products on the market.
-      </p>
-    </div>
-
-    <!-- Middle row -->
-    <div class="about-card">
-      <div class="flex justify-center items-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-credit-card">
-          <rect width="20" height="14" x="2" y="5" rx="2" />
-          <line x1="2" x2="22" y1="10" y2="10" />
-        </svg>
-      </div>
-      <h3 class="text-xl font-semibold mb-2">Secure Payments</h3>
-      <p class="text-muted-foreground/70 text-center">
-        We use verified payment systems to ensure every transaction is safe and secure.
-      </p>
-    </div>
-
-    <div class="about-card">
-      <div class="flex justify-center items-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-mouse-pointer-click">
-          <path d="m9 9 5 12 1.8-5.2L21 14Z" />
-          <path d="M7.2 2.2 8 5.1" />
-          <path d="m5.1 8-2.9-.8" />
-          <path d="M14 4.1 12 6" />
-          <path d="m6 12-1.9.5" />
-          <path d="m3.1 15.9.8 2.9" />
-          <path d="M21.8 7.2 18.9 8" />
-        </svg>
-      </div>
-      <h3 class="text-xl font-semibold mb-2">Easy To Use</h3>
-      <p class="text-muted-foreground/70 text-center">
-        Our cheats are designed for simplicity, so anyone can use them effortlessly.
-      </p>
-    </div>
-  </div>
-
-  <!-- Bottom big box -->
-  <div
-    class="support-box mt-12 max-w-5xl mx-auto bg-gradient-to-br from-[#1a1a2a] to-[#0a0a0a] rounded-xl p-10 shadow-xl flex flex-col items-center justify-center border border-[rgba(128,128,255,0.1)] relative overflow-hidden">
-    <div class="absolute inset-0 bg-grid-pattern -z-0"></div>
-    <h3 class="text-6xl font-bold mb-2 text-[#9269FF] text-shadow-glow">24/7</h3>
-    <p class="text-3xl font-semibold mb-6 text-[#9269FF] text-shadow-glow">Support</p>
-    <div class="flex gap-6">
-      <a href="#" class="product-btn btn-download">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
-          <path d="M9.93 7.51a6.47 6.47 0 0 1 8.56 8.56"></path>
-          <path d="M14.07 16.49a6.47 6.47 0 0 1-8.56-8.56"></path>
-          <path
-            d="M7.51 9.93a2.5 2.5 0 0 1 0-3.54l1.06-1.06a2.5 2.5 0 0 1 3.54 0l1.06 1.06a2.5 2.5 0 0 1 0 3.54l-1.06 1.06a2.5 2.5 0 0 1-3.54 0Z">
-          </path>
-          <path
-            d="M16.49 14.07a2.5 2.5 0 0 1 0-3.54l1.06-1.06a2.5 2.5 0 0 1 3.54 0l1.06 1.06a2.5 2.5 0 0 1 0 3.54l-1.06 1.06a2.5 2.5 0 0 1-3.54 0Z">
-          </path>
-        </svg>
-        Get Support
       </a>
-    </div>
+      <div class="hidden flex-row items-center gap-1 md:flex">
+        <link-button href="/tos" class="text-xs hover:text-[--accent-color]" data-id="000001" data-label="Terms"
+          data-variant="ghost" data-href="">Terms</link-button>
+
+        <link-button href="/reviews" class="text-xs hover:text-[--accent-color]" data-id="000002" data-label="Reviews"
+          data-variant="ghost" data-href="">Reviews</link-button>
+      </div>
+      <div class="flex flex-row items-center gap-4">
+        <currency-selector class="bg-white/10 hover:bg-white/25 border-transparent"></currency-selector>
+        <a href="/payment"
+          class="flex duration-500 justify-center items-center gap-3 rounded-md text-xl px-3 py-2.5 bg-white/10 hover:bg-white/25 relative">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-shopping-cart">
+            <circle cx="8" cy="21" r="1" />
+            <circle cx="19" cy="21" r="1" />
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+          </svg>
+          <span id="cart-count"
+            class="h-4 w-4 bg-[--accent-color] text-xs rounded-full aspect-square absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 flex items-center justify-center text-white leading-none">
+            {{ cartItems.items.length | plus: cartItems.bundles.length }}
+          </span>
+        </a>
+
+        <link-button href="/order"
+          class="hidden md:flex text-xs space-x-2 bg-[--accent-color] hover:bg-[--dark-accent-color]" data-id="000003"
+          data-label="Customer Login" data-variant="default" data-href="">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>Customer Login</span>
+        </link-button>
+
+        <header-bar-sidebar-btn
+          class="md:hidden inline-block px-2.5 py-2.5 hover:bg-white/10 rounded-md"></header-bar-sidebar-btn>
+      </div>
+    </nav>
   </div>
-</div>
-      <!-- FAQ Section -->
-      <div id="faq" class="py-12 sm:py-16 lg:py-20 text-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col items-center gap-2 px-4">
-          <div class="relative text-blue-500">
-            <div class="absolute h-full w-full bg-[--accent-color] opacity-10 rounded-md"></div>
-            <div class="badge whitespace-nowrap border-transparent inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs transition-colors duration-200 bg-opacity-5 text-[--accent-color] shadow hover:bg-opacity-10 w-fit gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <line x1="12" x2="12.01" y1="17" y2="17"></line>
-              </svg>
-              FAQ
+  <!-- Social Icons -->
+  {% assign arr = socials %}
+  <div class="flex flex-col gap-2 fixed bottom-2 right-2 z-20">
+    {%- for social in arr %}
+    <a href="{{ social.url }}" aria-label="{{ social.name }}" class="text-white">
+      <div class="flex items-center justify-center group">
+        {% if social.name == 'discord' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#6571ff]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 32 32"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M20.992 20.163a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008a2.86 2.86 0 0 1-2.688 3.022h-.008zm-9.966 0a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008q.005.074.005.161a2.867 2.867 0 0 1-2.692 2.862zM26.393 6.465c-1.763-.832-3.811-1.49-5.955-1.871l-.149-.022-.017-.002a.09.09 0 0 0-.081.047c-.234.411-.488.924-.717 1.45l-.043.111a23 23 0 0 0-6.985.016l.129-.017c-.27-.63-.528-1.142-.813-1.638l.041.077a.1.1 0 0 0-.083-.047l-.016.001h.001a24.6 24.6 0 0 0-6.256 1.957l.151-.064a.1.1 0 0 0-.04.034C2.706 10.538.998 15.566.998 20.993q0 1.36.141 2.684l-.009-.11a.1.1 0 0 0 .039.07 24.6 24.6 0 0 0 7.313 3.738l.176.048a.1.1 0 0 0 .028.004q.05-.002.077-.038a17.5 17.5 0 0 0 1.485-2.392l.047-.1a.096.096 0 0 0-.052-.132h-.001a16 16 0 0 1-2.417-1.157l.077.042a.1.1 0 0 1-.048-.083c0-.031.015-.059.038-.076.157-.118.315-.24.465-.364a.1.1 0 0 1 .097-.013h-.001c2.208 1.061 4.8 1.681 7.536 1.681s5.329-.62 7.643-1.727l-.107.046a.1.1 0 0 1 .099.012q.226.188.466.365a.1.1 0 0 1 .038.077.1.1 0 0 1-.046.082c-.661.395-1.432.769-2.235 1.078l-.105.036a.1.1 0 0 0-.062.089q0 .024.011.044v-.001c.501.96 1.009 1.775 1.571 2.548l-.04-.057a.1.1 0 0 0 .106.036h-.001c2.865-.892 5.358-2.182 7.566-3.832l-.065.047a.1.1 0 0 0 .039-.069c.087-.784.136-1.694.136-2.615 0-5.415-1.712-10.43-4.623-14.534l.052.078a.1.1 0 0 0-.038-.036z" />
+          </svg>
+        </div>
+        {% elsif social.name == 'telegram' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#2ba4df]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 48 48"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M41.42 7.309s3.885-1.515 3.56 2.164c-.107 1.515-1.078 6.818-1.834 12.553l-2.59 16.99s-.216 2.489-2.159 2.922c-1.942.432-4.856-1.515-5.396-1.948-.432-.325-8.094-5.195-10.792-7.575-.756-.65-1.62-1.948.108-3.463L33.649 18.13c1.295-1.3 2.59-4.33-2.806-.65l-15.11 10.28s-1.727 1.083-4.964.109l-7.016-2.165s-2.59-1.623 1.835-3.246c10.793-5.086 24.068-10.28 35.831-15.15" />
+          </svg>
+        </div>
+        {% elsif social.name == 'tiktok' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#fe2f5d]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 24 24"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M21 7v2a1 1 0 0 1-1 1 8 8 0 0 1-4-1.08v6.58a6.5 6.5 0 1 1-9.47-5.78 1 1 0 0 1 1.47.9v2.52a.92.92 0 0 1-.28.62 2.49 2.49 0 0 0 2 4.23A2.61 2.61 0 0 0 12 15.35V3a1 1 0 0 1 1-1h2.11a1 1 0 0 1 1 .83A4 4 0 0 0 20 6a1 1 0 0 1 1 1" />
+          </svg>
+        </div>
+        {% elsif social.name == 'youtube' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#fe0808]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path
+              d="M23 9.71a8.5 8.5 0 0 0-.91-4.13 2.92 2.92 0 0 0-1.72-1A78 78 0 0 0 12 4.27a79 79 0 0 0-8.34.3 2.87 2.87 0 0 0-1.46.74c-.9.83-1 2.25-1.1 3.45a48 48 0 0 0 0 6.48 9.6 9.6 0 0 0 .3 2 3.14 3.14 0 0 0 .71 1.36 2.86 2.86 0 0 0 1.49.78 45 45 0 0 0 6.5.33c3.5.05 6.57 0 10.2-.28a2.9 2.9 0 0 0 1.53-.78 2.5 2.5 0 0 0 .61-1 10.6 10.6 0 0 0 .52-3.4c.04-.56.04-3.94.04-4.54M9.74 14.85V8.66l5.92 3.11c-1.66.92-3.85 1.96-5.92 3.08" />
+          </svg>
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {%- endfor %}
+  </div>
+  <!-- LiquidJs Childrens -->
+  {% block content %}
+  {% endblock %}
+  <!-- React Component Childrens -->
+  <outlet></outlet>
+  <!-- Footer -->
+  <div class="w-full mx-auto max-w-[1400px]">
+    <div class="py-4 sm:pt-16 lg:pt-24 w-full px-4">
+      <div class="mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
+          <div class="md:col-span-2 lg:col-span-1">
+            <div class="flex flex-row items-center gap-2 w-fit">
+              <fade-in-image alt="website logo" src="{{ image }}"
+                class="h-8 w-8 rounded-full object-contain"></fade-in-image>
+              <span class="text-xl font-bold">
+                {{ name }}
+              </span>
             </div>
+            <p class="text-sm leading-relaxed text-muted-foreground/70 mt-4 max-w-lg">{{ description }}</p>
           </div>
-          <h2 class="text-center text-3xl sm:text-4xl font-bold">Frequently Asked Questions</h2>
-          <p class="max-w-xl text-center text-xs text-muted-foreground">
-            Here are some of the most common questions we get.
+          <div class="text-center md:text-left">
+            <p class="text-sm font-semibold tracking-widest text-[--accent-color] uppercase">Connect With Us</p>
+            <ul class="mt-4 space-y-2">
+              {% assign arr = socials %}
+              {%- for social in arr %}
+              <li>
+                <a href="{{ social.url }}" title="{{ social.name }}"
+                  class="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">
+                  <div class="w-5 h-5 flex items-center justify-center">
+                  {% if social.name == 'discord' %}
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.992 20.163a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008a2.86 2.86 0 0 1-2.688 3.022h-.008zm-9.966 0a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008q.005.074.005.161a2.867 2.867 0 0 1-2.692 2.862zM26.393 6.465c-1.763-.832-3.811-1.49-5.955-1.871l-.149-.022-.017-.002a.09.09 0 0 0-.081.047c-.234.411-.488.924-.717 1.45l-.043.111a23 23 0 0 0-6.985.016l.129-.017c-.27-.63-.528-1.142-.813-1.638l.041.077a.1.1 0 0 0-.083-.047l-.016.001h.001a24.6 24.6 0 0 0-6.256 1.957l.151-.064a.1.1 0 0 0-.04.034C2.706 10.538.998 15.566.998 20.993q0 1.36.141 2.684l-.009-.11a.1.1 0 0 0 .039.07 24.6 24.6 0 0 0 7.313 3.738l.176.048a.1.1 0 0 0 .028.004q.05-.002.077-.038a17.5 17.5 0 0 0 1.485-2.392l.047-.1a.096.096 0 0 0-.052-.132h-.001a16 16 0 0 1-2.417-1.157l.077.042a.1.1 0 0 1-.048-.083c0-.031.015-.059.038-.076.157-.118.315-.24.465-.364a.1.1 0 0 1 .097-.013h-.001c2.208 1.061 4.8 1.681 7.536 1.681s5.329-.62 7.643-1.727l-.107.046a.1.1 0 0 1 .099.012q.226.188.466.365a.1.1 0 0 1 .038.077.1.1 0 0 1-.046.082c-.661.395-1.432.769-2.235 1.078l-.105.036a.1.1 0 0 0-.062.089q0 .024.011.044v-.001c.501.96 1.009 1.775 1.571 2.548l-.04-.057a.1.1 0 0 0 .106.036h-.001c2.865-.892 5.358-2.182 7.566-3.832l-.065.047a.1.1 0 0 0 .039-.069c.087-.784.136-1.694.136-2.615 0-5.415-1.712-10.43-4.623-14.534l.052.078a.1.1 0 0 0-.038-.036z"></path></svg>
+                  {% elsif social.name == 'telegram' %}
+                    <svg width="14" height="14" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M41.42 7.309s3.885-1.515 3.56 2.164c-.107 1.515-1.078 6.818-1.834 12.553l-2.59 16.99s-.216 2.489-2.159 2.922c-1.942.432-4.856-1.515-5.396-1.948-.432-.325-8.094-5.195-10.792-7.575-.756-.65-1.62-1.948.108-3.463L33.649 18.13c1.295-1.3 2.59-4.33-2.806-.65l-15.11 10.28s-1.727 1.083-4.964.109l-7.016-2.165s-2.59-1.623 1.835-3.246c10.793-5.086 24.068-10.28 35.831-15.15"></path></svg>
+                  {% elsif social.name == 'tiktok' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21 7v2a1 1 0 0 1-1 1 8 8 0 0 1-4-1.08v6.58a6.5 6.5 0 1 1-9.47-5.78 1 1 0 0 1 1.47.9v2.52a.92.92 0 0 1-.28.62 2.49 2.49 0 0 0 2 4.23A2.61 2.61 0 0 0 12 15.35V3a1 1 0 0 1 1-1h2.11a1 1 0 0 1 1 .83A4 4 0 0 0 20 6a1 1 0 0 1 1 1"></path></svg>
+                  {% elsif social.name == 'youtube' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M23 9.71a8.5 8.5 0 0 0-.91-4.13 2.92 2.92 0 0 0-1.72-1A78 78 0 0 0 12 4.27a79 79 0 0 0-8.34.3 2.87 2.87 0 0 0-1.46.74c-.9.83-1 2.25-1.1 3.45a48 48 0 0 0 0 6.48 9.6 9.6 0 0 0 .3 2 3.14 3.14 0 0 0 .71 1.36 2.86 2.86 0 0 0 1.49.78 45 45 0 0 0 6.5.33c3.5.05 6.57 0 10.2-.28a2.9 2.9 0 0 0 1.53-.78 2.5 2.5 0 0 0 .61-1 10.6 10.6 0 0 0 .52-3.4c.04-.56.04-3.94.04-4.54M9.74 14.85V8.66l5.92 3.11c-1.66.92-3.85 1.96-5.92 3.08"></path></svg>
+                  {% endif %}
+                  </div>
+                  <span>{{ social.name | capitalize }}</span>
+                </a>
+              </li>
+              {%- endfor %}
+            </ul>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm font-semibold tracking-widest text-[--accent-color] uppercase">LEGAL</p>
+            <ul class="mt-4 space-y-2">
+              <li>
+                <a href="/tos" title="Terms & Conditions" class="flex items-center justify-center md:justify-start text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">Terms & Conditions</a>
+              </li>
+              <li>
+                <a href="/tos" title="Refund Policy" class="flex items-center justify-center md:justify-start text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">Refund Policy</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-12 border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between">
+          <p class="text-sm text-center text-white/70">
+            © <span id="copyright-year"></span> NightMarket.cc. All Rights Reserved.
           </p>
         </div>
-
-        <div class="mt-12 max-w-4xl mx-auto">
-          <div class="space-y-4">
-            <!-- FAQ Item 1 -->
-            <div class="faq-item">
-              <div class="faq-question">
-                <span>Can I make payments using my preferred method?</span>
-                <div class="faq-icon">
-                  <span class="icon-plus"></span>
-                  <span class="icon-minus"></span>
-                </div>
-              </div>
-              <div class="faq-answer">
-                <p>Yes. We support a wide range of payment methods including major cards and various cryptocurrencies—choose what’s most convenient for you.</p>
-              </div>
-            </div>
-            <!-- FAQ Item 2 -->
-            <div class="faq-item">
-              <div class="faq-question">
-                <span>Is it safe to make payments?</span>
-                <div class="faq-icon">
-                  <span class="icon-plus"></span>
-                  <span class="icon-minus"></span>
-                </div>
-              </div>
-              <div class="faq-answer">
-                <p>Absolutely. We use secure checkout and advanced fraud prevention. Sensitive payment data is not stored on our servers.</p>
-              </div>
-            </div>
-            <!-- FAQ Item 3 -->
-            <div class="faq-item">
-              <div class="faq-question">
-                <span>How do I make a purchase?</span>
-                <div class="faq-icon">
-                  <span class="icon-plus"></span>
-                  <span class="icon-minus"></span>
-                </div>
-              </div>
-              <div class="faq-answer">
-                <p>Browse products, add to cart, and proceed to checkout. After payment, you’ll receive instant access and instructions.</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </vertical-layout>
-  </slot>
-  <script key="indexPage-script">
-    {% raw %}"use strict";(()=>{function setLayoutCartCount(cartCount){let cartCountSpan=document.getElementById("cart-count");cartCountSpan&&(cartCountSpan.innerText=cartCount.toString())}function withErrorHandling(fn){try{return fn()}catch(e){console.error(e)}}async function getCartData({localCartStorage}){return withErrorHandling(async()=>{let cartResponse=await fetch("/api/getCart",{method:"POST",body:JSON.stringify(localCartStorage)});if(!cartResponse.ok)throw new Error("Failed to fetch cart");return await cartResponse.json()})??{items:[],bundles:[]}}function addItemOrBundleToCartObject({params}){let prev={...localCart};return"item"in params?(console.log(prev.items),prev.items.find(item=>item.variant.id===params.item.variant.id)?"Item already in cart":{...prev,items:[...prev.items,{id:params.item.id,quantity:params.item.quantity,coupon:params.item.coupon,addons:params.item.addons,variant:{id:params.item.variant.id},payWhatYouWantAmount:params.item.payWhatYouWantAmount}]}):prev.bundles.find(item=>item.id===params.bundle.id)?"Bundle already in cart":{...prev,bundles:[...prev.bundles,{id:params.bundle.id,quantity:1,coupon:params.bundle.coupon}]}}async function canAddVariantToCart({variantId,quantity}){return withErrorHandling(async()=>{let canAddVariantJson=await(await fetch("/api/canAddVariantToCart",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({variantId,quantity})})).json();return console.log("canAddVariantJson",canAddVariantJson),Zod.z.object({result:Zod.z.object({success:Zod.z.literal(!0)}).or(Zod.z.object({success:Zod.z.literal(!1),error:Zod.z.string()}))}).parse(canAddVariantJson).result})??{success:!1,error:"Failed to check if variant can be added to cart"}}async function addItemOrBundleToCartObjectWithValidation({params}){if("item"in params){let newCartResult2=addItemOrBundleToCartObject({params});if(typeof newCartResult2=="string")return newCartResult2;let canAddVariantParsed=await canAddVariantToCart({variantId:params.item.variant.id,quantity:params.item.quantity});return canAddVariantParsed.success?newCartResult2:canAddVariantParsed.error}let newCartResult=addItemOrBundleToCartObject({params});if(typeof newCartResult=="string")return newCartResult;let bundleInNewCart=(await getCartData({localCartStorage:newCartResult})).bundles.find(bundle=>bundle.id===params.bundle.id);if(!bundleInNewCart)return"Failed to find bundle in new cart";let variantIdsInBundle=bundleInNewCart.variants.map(variant=>variant.id),errors=(await Promise.all(variantIdsInBundle.map(async variantId=>canAddVariantToCart({variantId,quantity:1})))).filter(response=>!response.success);return errors.length>0?errors.map(error=>"error"in error?error.error:null).filter(v=>v!==null).join(", "):newCartResult}async function addBundleToCart({bundle}){let newLocalCart=await addItemOrBundleToCartObjectWithValidation({params:{bundle}});return typeof newLocalCart=="string"?newLocalCart:(setLocalCart(newLocalCart),setLayoutCartCount(newLocalCart.bundles.length+newLocalCart.items.length),!0)}async function handleBundleAddToCartClick(card){let bundleIdInput=card.querySelector('input[name="bundleId"]'),couponInput=card.querySelector('input[name="coupon"]'),bundleId=bundleIdInput?.value.trim();if(!bundleId)return console.error("No bundle selected"),!1;let coupon=couponInput?.value.trim()||void 0;isAddingBundleToCart(card,!0);let addToCartResult=await addBundleToCart({bundle:{coupon,id:bundleId}});if(addToCartResult===!0){toast.success("Bundle added to cart"),isAddingBundleToCart(card,!1);return}toast.error(addToCartResult),isAddingBundleToCart(card,!1)}function isAddingBundleToCart(card,value){let bundleAddToCartButton=card.querySelector('button[id="bundle-add-to-cart"]');if(!bundleAddToCartButton){console.error("bundleAddToCartButton not found");return}let loadingSvg=document.createElement("div");loadingSvg.className="animate-spin h-[14px] w-[14px] border border-white/20 border-t-white border-t-2 rounded-full",loadingSvg.id="checkout-button-loading",value?(bundleAddToCartButton.innerHTML="",bundleAddToCartButton.appendChild(loadingSvg)):(bundleAddToCartButton.innerHTML="Add To Cart",document.getElementById("checkout-button-loading")?.remove())}async function entrypoint(){let announcementCloseBtn=document.getElementById("announcement-close-btn"),announcement=document.getElementById("announcement-div");announcementCloseBtn&&announcement&&announcementCloseBtn.addEventListener("click",()=>{announcement.style.display="none"}),document.body.addEventListener("click",async e=>{let htmlElement=e.target;if(htmlElement&&"id"in htmlElement&&htmlElement.id==="bundle-add-to-cart"){let card=htmlElement.closest('[action-name="checkout"]');if(!card)return;await handleBundleAddToCartClick(card)}})}entrypoint(/*!{% endraw %}*/decodeURIComponent(``)/*!{% raw %}*/);
+    </div>
+  </div>
+  <script id="header-script">
+    // Select the navbar
+    const navbar = document.getElementById('headerBar');
 
-document.querySelectorAll('.about-card, .faq-item').forEach(card => {
-    card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--x', `${x}px`);
-        card.style.setProperty('--y', `${y}px`);
-    });
-});
-
-const supportBox = document.querySelector('.support-box');
-if (supportBox) {
-  supportBox.addEventListener('mouseenter', () => {
-    supportBox.classList.remove('glow-fade-out');
-    supportBox.classList.add('glow-active');
-  });
-
-  supportBox.addEventListener('mouseleave', () => {
-    supportBox.classList.remove('glow-active');
-    supportBox.classList.add('glow-fade-out');
-  });
-}
-
-// --- FAQ Accordion Logic ---
-document.querySelectorAll('.faq-question').forEach(question => {
-  question.addEventListener('click', () => {
-    const faqItem = question.parentElement;
-    const answer = faqItem.querySelector('.faq-answer');
-
-    // Toggle the 'active' class on the clicked item
-    faqItem.classList.toggle('active');
-
-    // Set the max-height for the animation
-    if (faqItem.classList.contains('active')) {
-      answer.style.maxHeight = answer.scrollHeight + 'px';
-    } else {
-      answer.style.maxHeight = '0px';
+    // Function to check scroll position and update navbar background
+    function updateNavbarBackground() {
+      if (window.scrollY === 0) {
+        // At the top: make background transparent
+        navbar.classList.remove('backdrop-blur-md', 'bg-white/[0.05]');
+        navbar.classList.add('bg-transparent');
+      } else {
+        // Scrolled down: restore original background
+        navbar.classList.remove('bg-transparent');
+        navbar.classList.add('backdrop-blur-md', 'bg-white/[0.05]');
+      }
     }
-  });
-});
-})();{% endraw %}
+
+    // Listen for scroll events
+    window.addEventListener('scroll', updateNavbarBackground);
+
+    // Call once on load to set the correct initial state
+    updateNavbarBackground();
   </script>
-
-  <style>
-    .category-box {
-      border: 1px solid var(--color);
-    }
-
-    .category-box .gradient {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      background: var(--color);
-      filter: blur(50px);
-      transition: all 0.25s ease-in-out;
-      transform: scale(1) translateY(55%);
-    }
-
-    .category-box:hover .gradient {
-      transform: scale(2) translateY(55%);
-    }
-
-    .products-filter-container {
-      gap: 2rem;
-    }
-
-    @media (min-width: 768px) {
-
-      .products-filter-container .product,
-      .products-filter-container .product .product-info {
-        flex-direction: row !important;
-      }
-
-      .products-filter-container .product .purchase {
-        display: inline-flex !important;
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .products-filter-container {
-        flex-direction: row !important;
-      }
-
-      .products-filter-container .filter {
-        width: 25% !important;
-      }
-    }
-
-    /* Styles for "Why should you choose us?" section */
-    .about-card {
-      text-align: center;
-      padding: 2rem;
-      background: rgba(20, 20, 20, 0.5);
-      border-radius: 15px;
-      border: 1px solid rgba(128, 128, 255, 0.1);
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .about-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(300px circle at var(--x) var(--y), rgba(146, 105, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .about-card:hover::before {
-      opacity: 1;
-    }
-
-    .about-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(128, 128, 255, 0.2);
-      box-shadow: 0 10px 30px rgba(128, 128, 255, 0.1);
-    }
-
-    .about-card>* {
-      position: relative;
-      z-index: 2;
-    }
-
-    .product-btn {
-      padding: 0.7rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-flex;
-      /* Use inline-flex for alignment */
-      align-items: center;
-      /* Center content vertically */
-      justify-content: center;
-      /* Center content horizontally */
-      gap: 0.5rem;
-      /* Add gap for icon */
-      font-size: 0.9rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .product-btn::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(146, 105, 255, 0.2);
-      border-radius: 50%;
-      transition: all 0.4s ease;
-      transform: translate(-50%, -50%);
-    }
-
-    .product-btn:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-
-    .btn-download {
-      background: linear-gradient(135deg, #9269FF, #7A53CC);
-      color: white;
-      flex: 1;
-      font-size: 1rem;
-      box-shadow: 0 5px 20px rgba(146, 105, 255, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .btn-download:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 8px 30px rgba(146, 105, 255, 0.6);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
-    }
-
-    .support-box {
-      transition: box-shadow 0.3s ease, border-color 0.3s ease;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 5px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .bg-grid-pattern {
-      --color: rgba(114, 114, 114, 0.3);
-      background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%, transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%, transparent),
-        linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%, transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%, transparent);
-      background-size: 55px 55px;
-      animation: scrollGrid 5s linear infinite;
-      animation-play-state: paused;
-    }
-
-    .support-box.glow-active {
-      border-color: rgba(146, 105, 255, 0.5);
-      animation: fadeInGlow 0.5s ease-in-out forwards, pulseGlow 2s 0.5s ease-in-out infinite;
-    }
-
-    .support-box.glow-fade-out {
-      animation: fadeOutGlow 0.5s ease-in-out forwards;
-    }
-
-    .support-box.glow-active .bg-grid-pattern {
-      animation-play-state: running;
-    }
-
-    @keyframes fadeInGlow {
-      from {
-        box-shadow: 0 0 0 rgba(146, 105, 255, 0), 0 0 0 rgba(146, 105, 255, 0) inset;
-      }
-
-      to {
-        box-shadow: 0 0 25px rgba(146, 105, 255, 0.5), 0 0 5px rgba(146, 105, 255, 0.3) inset;
-      }
-    }
-
-    @keyframes fadeOutGlow {
-      from {
-        box-shadow: 0 0 25px rgba(146, 105, 255, 0.5), 0 0 5px rgba(146, 105, 255, 0.3) inset;
-      }
-
-      to {
-        box-shadow: 0 0 0 rgba(146, 105, 255, 0), 0 0 0 rgba(146, 105, 255, 0) inset;
-      }
-    }
-
-    @keyframes pulseGlow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 25px rgba(146, 105, 255, 0.5), 0 0 5px rgba(146, 105, 255, 0.3) inset;
-      }
-
-      50% {
-        box-shadow: 0 0 35px rgba(146, 105, 255, 0.7), 0 0 10px rgba(146, 105, 255, 0.5) inset;
-      }
-    }
-
-    @keyframes scrollGrid {
-      from {
-        background-position: 0 0;
-      }
-
-      to {
-        background-position: -55px -55px;
-      }
-    }
-
-    .badge {
-      box-shadow: 0 0 10px rgba(146, 105, 255, 0.3), 0 0 20px rgba(146, 105, 25.2);
-    }
-
-    .text-shadow-glow {
-      text-shadow: 0 0 8px rgba(146, 105, 255, 0.6);
-    }
-
-    .support-box h3::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 160%;
-      padding-bottom: 160%;
-      background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 70%);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      z-index: -1;
-      opacity: 1;
-      filter: blur(35px);
-    }
-
-    /* --- New FAQ Section Styles --- */
-    #faq {
-      background: transparent;
-    }
-
-    .faq-item {
-      background: rgba(20, 20, 20, 0.5);
-      border: 1px solid rgba(128, 128, 255, 0.1);
-      border-radius: 15px;
-      overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-    }
-
-    .faq-item::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(300px circle at var(--x) var(--y), rgba(146, 105, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .faq-item:hover::before {
-      opacity: 1;
-    }
-
-    .faq-item:hover {
-      border-color: rgba(128, 128, 255, 0.2);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(128, 128, 255, 0.1);
-    }
-
-    .faq-item.active {
-      border-color: rgba(146, 105, 255, 0.5);
-      box-shadow: 0 0 25px rgba(146, 105, 255, 0.1);
-    }
-
-    .faq-question {
-      padding: 1.25rem 1.5rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      color: #fff;
-      position: relative;
-      z-index: 2;
-    }
-
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1.0);
-      color: rgba(255, 255, 255, 0.7);
-      position: relative;
-      z-index: 2;
-    }
-
-    .faq-answer p {
-      padding: 0 1.5rem 1.25rem;
-      margin: 0;
-    }
-
-    .faq-icon {
-      width: 24px;
-      height: 24px;
-      position: relative;
-      transition: transform 0.3s ease;
-    }
-
-    .icon-plus, .icon-minus {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 16px;
-      height: 2px;
-      background-color: #fff;
-      transition: transform 0.3s ease, opacity 0.2s ease;
-    }
-
-    .icon-plus {
-      transform: translate(-50%, -50%) rotate(90deg);
-    }
-
-    .icon-minus {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    .faq-item.active .icon-plus {
-      transform: translate(-50%, -50%) rotate(0deg);
-      opacity: 0;
-    }
-
-    .faq-item.active .icon-minus {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-  </style>
 </div>
+<script key="layout-script">{% raw %}"use strict";(()=>{function setLayoutCartCount(cartCount){let cartCountSpan=document.getElementById("cart-count");cartCountSpan&&(cartCountSpan.innerText=cartCount.toString())}async function entrypoint(){setLayoutCartCount(localCart.bundles.length+localCart.items.length)}entrypoint(/*!{% endraw %}*/decodeURIComponent(``)/*!{% raw %}*/);
+})();{% endraw %}</script>
+<script>
+  document.getElementById('copyright-year').textContent = new Date().getFullYear();
+</script>
