@@ -677,17 +677,17 @@
 
           <!-- Product Status -->
           {% assign status = product.displayedStatus | downcase %}
-          <div class="text-sm p-4 rounded-md
+          <div class="text-sm p-4 rounded-md bg-transparent border
             {% if status contains 'undetected' %}
-              bg-green-500/10 text-green-500
+              border-green-500 text-green-500
             {% elsif status contains 'detected' %}
-              bg-red-500/10 text-red-500
+              border-red-500 text-red-500
             {% elsif status contains 'updating' %}
-              bg-orange-500/10 text-orange-500
+              border-orange-500 text-orange-500
             {% elsif status contains 'testing' %}
-              bg-blue-500/10 text-blue-500
+              border-blue-500 text-blue-500
             {% else %}
-              bg-[--light-accent-color] text-[--accent-color]
+              border-[--light-accent-color] text-[--accent-color]
             {% endif %}
           ">
             <div class="flex items-center gap-2 whitespace-pre-wrap overflow-x-scroll [&>div]:w-full">
