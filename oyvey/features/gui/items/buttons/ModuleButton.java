@@ -4,6 +4,8 @@ import me.alpha432.oyvey.features.gui.items.Item;
 import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.features.settings.Bind;
 import me.alpha432.oyvey.features.settings.Setting;
+import me.alpha432.oyvey.util.render.Animation;
+import me.alpha432.oyvey.util.render.ScissorUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
@@ -16,6 +18,7 @@ public class ModuleButton
     private final Module module;
     private List<Item> items = new ArrayList<>();
     private boolean subOpen;
+    private final Animation animation = new Animation(200, 0);
 
     public ModuleButton(Module module) {
         super(module.getName());
@@ -55,19 +58,25 @@ public class ModuleButton
     @Override
     public void drawScreen(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
         super.drawScreen(context, mouseX, mouseY, partialTicks);
-        if (!this.items.isEmpty()) {
-            if (this.subOpen) {
-                float height = 16.0f;
-                for (Item item : this.items) {
-                    if (!item.isHidden()) {
-                        item.setLocation(this.x + 1.0f, this.y + height);
-                        item.setWidth(this.width - 9);
-                        item.drawScreen(context, mouseX, mouseY, partialTicks);
-                        height += item.getHeight() + 1f;
-                    }
-                    item.update();
+        animation.setEnd(subOpen ? 1 : 0);
+        animation.update();
+        if (!this.items.isEmpty() && animation.getCurrent() > 0) {
+            float itemHeight = 0;
+            for (Item item : items)
+                itemHeight += item.getHeight() + 1.5f;
+
+            ScissorUtil.enable(context, (int) x, (int) y + 14, (int) width, (int) (itemHeight * animation.getCurrent()));
+            float height = 14.0f;
+            for (Item item : this.items) {
+                if (!item.isHidden()) {
+                    item.setLocation(this.x + 1.0f, this.y + height);
+                    item.setWidth(this.width - 9);
+                    item.drawScreen(context, mouseX, mouseY, partialTicks);
+                    height += item.getHeight() + 1.5f;
                 }
+                item.update();
             }
+            ScissorUtil.disable(context);
         }
     }
 
@@ -79,7 +88,7 @@ public class ModuleButton
                 this.subOpen = !this.subOpen;
                 mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
             }
-            if (this.subOpen) {
+            if (animation.getCurrent() > 0.01) {
                 for (Item item : this.items) {
                     if (item.isHidden()) continue;
                     item.mouseClicked(mouseX, mouseY, mouseButton);
@@ -91,7 +100,7 @@ public class ModuleButton
     @Override
     public void mouseReleased(int mouseX, int mouseY, int releaseButton) {
         super.mouseReleased(mouseX, mouseY, releaseButton);
-        if (!this.items.isEmpty() && this.subOpen) {
+        if (animation.getCurrent() > 0.01) {
             for (Item item : this.items) {
                 if (item.isHidden()) continue;
                 item.mouseReleased(mouseX, mouseY, releaseButton);
@@ -102,7 +111,7 @@ public class ModuleButton
     @Override
     public void onKeyTyped(String typedChar, int keyCode) {
         super.onKeyTyped(typedChar, keyCode);
-        if (!this.items.isEmpty() && this.subOpen) {
+        if (animation.getCurrent() > 0.01) {
             for (Item item : this.items) {
                 if (item.isHidden()) continue;
                 item.onKeyTyped(typedChar, keyCode);
@@ -113,7 +122,7 @@ public class ModuleButton
     @Override
     public void onKeyPressed(int key) {
         super.onKeyPressed(key);
-        if (!this.items.isEmpty() && this.subOpen) {
+        if (animation.getCurrent() > 0.01) {
             for (Item item : this.items) {
                 if (item.isHidden()) continue;
                 item.onKeyPressed(key);
@@ -123,13 +132,13 @@ public class ModuleButton
 
     @Override
     public int getHeight() {
-        if (this.subOpen) {
-            int height = 16;
+        if (subOpen) {
+            float height = 14.0f;
             for (Item item : this.items) {
                 if (item.isHidden()) continue;
-                height += item.getHeight() + 1;
+                height += item.getHeight() + 1.5f;
             }
-            return height;
+            return (int) height;
         }
         return 14;
     }

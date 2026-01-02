@@ -5,7 +5,8 @@ import me.alpha432.oyvey.features.gui.items.Item;
 import me.alpha432.oyvey.features.gui.items.buttons.Button;
 import me.alpha432.oyvey.features.modules.client.ClickGui;
 import me.alpha432.oyvey.util.ColorUtil;
-import me.alpha432.oyvey.util.render.RenderUtil;
+import me.alpha432.oyvey.util.render.Animation;
+import me.alpha432.oyvey.util.render.RoundedUtil;
 import me.alpha432.oyvey.util.render.ScissorUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -28,6 +29,7 @@ public class Widget
     private int height;
     private boolean open;
     private boolean hidden = false;
+    private final Animation animation = new Animation(200, 0);
 
     public Widget(String name, int x, int y, boolean open) {
         super(name);
@@ -36,6 +38,7 @@ public class Widget
         this.width = 88;
         this.height = 18;
         this.open = open;
+        animation.setCurrent(open ? 1 : 0);
     }
 
     private void drag(int mouseX, int mouseY) {
@@ -49,34 +52,36 @@ public class Widget
     public void drawScreen(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
         this.context = context;
         this.drag(mouseX, mouseY);
-        float totalItemHeight = this.open ? this.getTotalItemHeight() - 2.0f : 0.0f;
-        int color = ClickGui.getInstance().topColor.getValue().getRGB();
-        context.fill(this.x, this.y - 1, this.x + this.width, this.y + this.height - 6, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()).getRGB() : color);
-        if (this.open) {
-            RenderUtil.rect(context, this.x, (float) this.y + 12.5f, this.x + this.width, (float) (this.y + this.height) + totalItemHeight, 0x77000000);
-        }
-        drawString(this.getName(), (float) this.x + 3.0f, (float) this.y - 4.0f - (float) OyVeyGui.getClickGui().getTextOffset(), -1);
-        ScissorUtil.enable(context, x, 0, x + width, mc.getWindow().getGuiScaledHeight());
+        animation.update();
+        animation.setEnd(open ? 1 : 0);
 
-        if (this.open) {
-            float y = (float) (this.getY() + this.getHeight()) - 3.0f;
+        float totalItemHeight = getTotalItemHeight() - 2.0f;
+        double animatedHeight = animation.getCurrent() * totalItemHeight;
+
+        int color = ClickGui.getInstance().topColor.getValue().getRGB();
+        RoundedUtil.rect(context, x, y - 1, width, height - 6, 3, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()) : new Color(color));
+        if (animatedHeight > 0)
+            RoundedUtil.rect(context, x, y + 12.5f, width, (float) (height - 12.5 + animatedHeight), 3, new Color(0x77000000, true));
+
+        drawString(this.getName(), (float) this.x + 3.0f, (float) this.y - 4.0f - (float) OyVeyGui.getClickGui().getTextOffset(), -1);
+
+        if (animatedHeight > 0) {
+            int scissorY = (int) (this.y + this.height - 3);
+            ScissorUtil.enable(context, x, scissorY, width, (int) animatedHeight);
+            float itemY = (float) (this.getY() + this.getHeight()) - 3.0f;
             for (Item item : this.getItems()) {
                 if (item.isHidden()) continue;
-                item.setLocation((float) this.x + 2.0f, y);
+                item.setLocation((float) this.x + 2.0f, itemY);
                 item.setWidth(this.getWidth() - 4);
-                if (item.isHovering(mouseX, mouseY)) {
+                if (item.isHovering(mouseX, mouseY))
                     ScissorUtil.disable(context);
-                }
                 item.drawScreen(context, mouseX, mouseY, partialTicks);
-
-                if (item.isHovering(mouseX, mouseY)) {
-                    ScissorUtil.enable(context);
-                }
-                y += (float) item.getHeight() + 2f;
+                if (item.isHovering(mouseX, mouseY))
+                    ScissorUtil.enable(context, x, scissorY, width, (int) animatedHeight);
+                itemY += (float) item.getHeight() + 2f;
             }
+            ScissorUtil.disable(context);
         }
-
-        ScissorUtil.disable(context);
     }
 
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
@@ -93,13 +98,11 @@ public class Widget
         }
         if (mouseButton == 1 && this.isHovering(mouseX, mouseY)) {
             this.open = !this.open;
+            animation.setEnd(open ? 1 : 0);
             mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
             return;
         }
-        if (!this.open) {
-            return;
-        }
-        this.getItems().forEach(item -> item.mouseClicked(mouseX, mouseY, mouseButton));
+        if (animation.getCurrent() > 0.01) this.getItems().forEach(item -> item.mouseClicked(mouseX, mouseY, mouseButton));
     }
 
     public void mouseReleased(int mouseX, int mouseY, int releaseButton) {
@@ -109,19 +112,15 @@ public class Widget
         if (!this.open) {
             return;
         }
-        this.getItems().forEach(item -> item.mouseReleased(mouseX, mouseY, releaseButton));
+        if (animation.getCurrent() > 0.01) this.getItems().forEach(item -> item.mouseReleased(mouseX, mouseY, releaseButton));
     }
 
     public void onKeyTyped(String typedChar, int keyCode) {
-        if (!this.open) {
-            return;
-        }
-        this.getItems().forEach(item -> item.onKeyTyped(typedChar, keyCode));
+        if (animation.getCurrent() > 0.01) this.getItems().forEach(item -> item.onKeyTyped(typedChar, keyCode));
     }
 
     public void onKeyPressed(int key) {
-        if (!open) return;
-        this.getItems().forEach(item -> item.onKeyPressed(key));
+        if (animation.getCurrent() > 0.01) this.getItems().forEach(item -> item.onKeyPressed(key));
     }
 
     public void addButton(Button button) {
