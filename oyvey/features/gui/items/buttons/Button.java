@@ -5,14 +5,18 @@ import me.alpha432.oyvey.features.gui.OyVeyGui;
 import me.alpha432.oyvey.features.gui.Widget;
 import me.alpha432.oyvey.features.gui.items.Item;
 import me.alpha432.oyvey.features.modules.client.ClickGui;
-import me.alpha432.oyvey.util.render.RenderUtil;
+import me.alpha432.oyvey.util.render.Animation;
+import me.alpha432.oyvey.util.render.RoundedUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 
+import java.awt.*;
+
 public class Button
         extends Item {
     private boolean state;
+    private final Animation animation = new Animation(200, 0);
 
     public Button(String name) {
         super(name);
@@ -21,7 +25,10 @@ public class Button
 
     @Override
     public void drawScreen(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
-        RenderUtil.rect(context, this.x, this.y, this.x + (float) this.width, this.y + (float) this.height - 0.5f, this.getState() ? (!this.isHovering(mouseX, mouseY) ? OyVey.colorManager.getColorWithAlpha(y, ClickGui.getInstance().color.getValue().getAlpha()) : OyVey.colorManager.getColorWithAlpha(y, ClickGui.getInstance().topColor.getValue().getAlpha())) : (!this.isHovering(mouseX, mouseY) ? 0x11555555 : -2007673515));
+        animation.setEnd(isHovering(mouseX, mouseY) ? 1 : 0);
+        animation.update();
+        Color color = ClickGui.getInstance().topColor.getValue();
+        RoundedUtil.rect(context, this.x, this.y, this.width, this.height - 0.5f, 2, getState() ? new Color(color.getRed(), color.getGreen(), color.getBlue(), (int) (120 + animation.getCurrent() * 40)) : new Color(20, 20, 20, (int) (100 + animation.getCurrent() * 40)));
         drawString(this.getName(), this.x + 2.3f, this.y - 2.0f - (float) OyVeyGui.getClickGui().getTextOffset(), this.getState() ? -1 : -5592406);
     }
 
