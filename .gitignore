@@ -1,0 +1,36 @@
+# Gradle
+.gradle
+build
+!build/libs
+
+# IntelliJ
+.idea
+*.iml
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Netbeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VSCode
+.vscode
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Other
+out/
+bin/
