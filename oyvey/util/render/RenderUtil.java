@@ -383,20 +383,20 @@ public class RenderUtil implements Util {
         float b = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.vertex(x1, y2, 0.0D).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(x2, y2, 0.0D).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(x2, y1, 0.0D).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(x1, y1, 0.0D).color(r, g, b, a).endVertex();
+        bufferBuilder.addVertex(x1, y2, 0.0F).setColor(r, g, b, a);
+        bufferBuilder.addVertex(x2, y2, 0.0F).setColor(r, g, b, a);
+        bufferBuilder.addVertex(x2, y1, 0.0F).setColor(r, g, b, a);
+        bufferBuilder.addVertex(x1, y1, 0.0F).setColor(r, g, b, a);
         Layers.getGlobalQuads().draw(bufferBuilder.buildOrThrow());
     }
 
 
     private static void drawCornerGui(float cx, float cy, float r, int start, int end, float red, float green, float blue, float alpha) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.vertex(cx, cy, 0).color(red, green, blue, alpha).endVertex();
+        bufferBuilder.addVertex(cx, cy, 0.0F).setColor(red, green, blue, alpha);
         for (int i = start; i <= end; i += 4) {
             double angle = Math.toRadians(i);
-            bufferBuilder.vertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).color(red, green, blue, alpha).endVertex();
+            bufferBuilder.addVertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0.0F).setColor(red, green, blue, alpha);
         }
         Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }
@@ -405,7 +405,7 @@ public class RenderUtil implements Util {
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (int i = start; i <= end; i += 4) {
             double angle = Math.toRadians(i);
-            bufferBuilder.vertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).color(red, green, blue, alpha).endVertex();
+            bufferBuilder.addVertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0.0F).setColor(red, green, blue, alpha);
         }
         Layers.getGlobalLines(lineWidth).draw(bufferBuilder.buildOrThrow());
     }
