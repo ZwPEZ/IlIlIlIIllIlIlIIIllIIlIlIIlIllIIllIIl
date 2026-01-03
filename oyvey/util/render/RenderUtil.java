@@ -303,19 +303,18 @@ public class RenderUtil implements Util {
                 }
             }
         }
+    }
 
     public static void drawSmoothRect(
-            PoseStack matrices,
             float x, float y,
             float width, float height,
             float radius,
             int color
     ) {
-        drawSmoothRect(matrices, x, y, width, height, radius, color, 0, 0);
+        drawSmoothRect(x, y, width, height, radius, color, 0, 0);
     }
 
     public static void drawSmoothRect(
-            PoseStack matrices,
             float x, float y,
             float width, float height,
             float radius,
@@ -340,60 +339,74 @@ public class RenderUtil implements Util {
 
         if (a > 0) {
             // Center rect
-            rectFilled(matrices, x1 + radius, y1 + radius, x2 - radius, y2 - radius, color);
+            rectFilledGui(x1 + radius, y1 + radius, x2 - radius, y2 - radius, color);
             // Top rect
-            rectFilled(matrices, x1 + radius, y1, x2 - radius, y1 + radius, color);
+            rectFilledGui(x1 + radius, y1, x2 - radius, y1 + radius, color);
             // Bottom rect
-            rectFilled(matrices, x1 + radius, y2 - radius, x2 - radius, y2, color);
+            rectFilledGui(x1 + radius, y2 - radius, x2 - radius, y2, color);
             // Left rect
-            rectFilled(matrices, x1, y1 + radius, x1 + radius, y2 - radius, color);
+            rectFilledGui(x1, y1 + radius, x1 + radius, y2 - radius, color);
             // Right rect
-            rectFilled(matrices, x2 - radius, y1 + radius, x2, y2 - radius, color);
+            rectFilledGui(x2 - radius, y1 + radius, x2, y2 - radius, color);
 
             // Corners
-            drawCorner(matrices, x1 + radius, y1 + radius, radius, 0, 90, r, g, b, a); // Top-left
-            drawCorner(matrices, x2 - radius, y1 + radius, radius, 90, 180, r, g, b, a); // Top-right
-            drawCorner(matrices, x2 - radius, y2 - radius, radius, 180, 270, r, g, b, a); // Bottom-right
-            drawCorner(matrices, x1 + radius, y2 - radius, radius, 270, 360, r, g, b, a); // Bottom-left
+            drawCornerGui(x1 + radius, y1 + radius, radius, 0, 90, r, g, b, a); // Top-left
+            drawCornerGui(x2 - radius, y1 + radius, radius, 90, 180, r, g, b, a); // Top-right
+            drawCornerGui(x2 - radius, y2 - radius, radius, 180, 270, r, g, b, a); // Bottom-right
+            drawCornerGui(x1 + radius, y2 - radius, radius, 270, 360, r, g, b, a); // Bottom-left
         }
 
 
         // Draw the outline
         if (outlineWidth > 0 && oa > 0) {
             // Top line
-            rectFilled(matrices, x1 + radius, y1, x2 - radius, y1 + outlineWidth, outlineColor);
+            rectFilledGui(x1 + radius, y1, x2 - radius, y1 + outlineWidth, outlineColor);
             // Bottom line
-            rectFilled(matrices, x1 + radius, y2 - outlineWidth, x2 - radius, y2, outlineColor);
+            rectFilledGui(x1 + radius, y2 - outlineWidth, x2 - radius, y2, outlineColor);
             // Left line
-            rectFilled(matrices, x1, y1 + radius, x1 + outlineWidth, y2 - radius, outlineColor);
+            rectFilledGui(x1, y1 + radius, x1 + outlineWidth, y2 - radius, outlineColor);
             // Right line
-            rectFilled(matrices, x2 - outlineWidth, y1 + radius, x2, y2 - radius, outlineColor);
+            rectFilledGui(x2 - outlineWidth, y1 + radius, x2, y2 - radius, outlineColor);
 
             // Corners
-            drawCornerOutline(matrices, x1 + radius, y1 + radius, radius, 0, 90, or, og, ob, oa, outlineWidth); // Top-left
-            drawCornerOutline(matrices, x2 - radius, y1 + radius, radius, 90, 180, or, og, ob, oa, outlineWidth); // Top-right
-            drawCornerOutline(matrices, x2 - radius, y2 - radius, radius, 180, 270, or, og, ob, oa, outlineWidth); // Bottom-right
-            drawCornerOutline(matrices, x1 + radius, y2 - radius, radius, 270, 360, or, og, ob, oa, outlineWidth); // Bottom-left
+            drawCornerOutlineGui(x1 + radius, y1 + radius, radius, 0, 90, or, og, ob, oa, outlineWidth); // Top-left
+            drawCornerOutlineGui(x2 - radius, y1 + radius, radius, 90, 180, or, og, ob, oa, outlineWidth); // Top-right
+            drawCornerOutlineGui(x2 - radius, y2 - radius, radius, 180, 270, or, og, ob, oa, outlineWidth); // Bottom-right
+            drawCornerOutlineGui(x1 + radius, y2 - radius, radius, 270, 360, or, og, ob, oa, outlineWidth); // Bottom-left
         }
     }
 
-    private static void drawCorner(PoseStack matrices, float cx, float cy, float r, int start, int end, float red, float green, float blue, float alpha) {
+    public static void rectFilledGui(float x1, float y1, float x2, float y2, int color) {
+        float a = (float) (color >> 24 & 255) / 255.0F;
+        float r = (float) (color >> 16 & 255) / 255.0F;
+        float g = (float) (color >> 8 & 255) / 255.0F;
+        float b = (float) (color & 255) / 255.0F;
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(x1, y2, 0.0D).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(x2, y2, 0.0D).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(x2, y1, 0.0D).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(x1, y1, 0.0D).color(r, g, b, a).endVertex();
+        Layers.getGlobalQuads().draw(bufferBuilder.buildOrThrow());
+    }
+
+
+    private static void drawCornerGui(float cx, float cy, float r, int start, int end, float red, float green, float blue, float alpha) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.addVertex(matrices.last().pose(), cx, cy, 0).setColor(red, green, blue, alpha);
+        bufferBuilder.vertex(cx, cy, 0).color(red, green, blue, alpha).endVertex();
         for (int i = start; i <= end; i += 4) {
             double angle = Math.toRadians(i);
-            bufferBuilder.addVertex(matrices.last().pose(), (float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).setColor(red, green, blue, alpha);
+            bufferBuilder.vertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).color(red, green, blue, alpha).endVertex();
         }
         Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }
 
-    private static void drawCornerOutline(PoseStack matrices, float cx, float cy, float r, int start, int end, float red, float green, float blue, float alpha, float lineWidth) {
+    private static void drawCornerOutlineGui(float cx, float cy, float r, int start, int end, float red, float green, float blue, float alpha, float lineWidth) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (int i = start; i <= end; i += 4) {
             double angle = Math.toRadians(i);
-            bufferBuilder.addVertex(matrices.last().pose(), (float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).setColor(red, green, blue, alpha);
+            bufferBuilder.vertex((float) (cx + Math.cos(angle) * r), (float) (cy + Math.sin(angle) * r), 0).color(red, green, blue, alpha).endVertex();
         }
         Layers.getGlobalLines(lineWidth).draw(bufferBuilder.buildOrThrow());
-    }
     }
 }

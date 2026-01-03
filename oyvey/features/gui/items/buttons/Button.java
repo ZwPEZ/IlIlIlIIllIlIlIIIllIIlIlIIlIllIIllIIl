@@ -26,7 +26,7 @@ public class Button
                     ? OyVey.colorManager.getColorWithAlpha(y, ClickGui.getInstance().topColor.getValue().getAlpha())
                     : OyVey.colorManager.getColorWithAlpha(y, ClickGui.getInstance().color.getValue().getAlpha()))
                 : (this.isHovering(mouseX, mouseY) ? 0x99333333 : 0x99111111);
-        RenderUtil.drawSmoothRect(context.pose(), this.x, this.y, this.width, this.height - 0.5f, 3.5f, color);
+        RenderUtil.drawSmoothRect(this.x, this.y, this.width, this.height - 0.5f, 3.5f, color);
         drawString(getName(), x + (width - mc.font.width(getName())) / 2f, this.y - 2.0f - (float) OyVeyGui.getClickGui().getTextOffset(), this.getState() ? -1 : -5592406);
     }
 

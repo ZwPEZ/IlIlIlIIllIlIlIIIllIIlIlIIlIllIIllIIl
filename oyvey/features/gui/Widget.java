@@ -56,7 +56,7 @@ public class Widget
         int textColor = ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()).getRGB() : ClickGui.getInstance().topColor.getValue().getRGB();
 
         float totalHeight = (float) (this.height - 7) + (open ? totalItemHeight + 9.5f : 0);
-        RenderUtil.drawSmoothRect(context.pose(), this.x, this.y - 1, this.width, totalHeight, 7.5f, backgroundColor, 0.5f, outlineColor);
+        RenderUtil.drawSmoothRect(this.x, this.y - 1, this.width, totalHeight, 7.5f, backgroundColor, 0.5f, outlineColor);
 
         drawString(this.getName(), (float) this.x + ((float) this.width - mc.font.width(this.getName())) / 2, (float) this.y + 2.0f - (float) OyVeyGui.getClickGui().getTextOffset(), textColor);
         ScissorUtil.enable(context, x, 0, x + width, mc.getWindow().getGuiScaledHeight());
