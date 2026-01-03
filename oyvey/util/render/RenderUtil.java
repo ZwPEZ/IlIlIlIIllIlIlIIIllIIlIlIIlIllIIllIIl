@@ -304,4 +304,58 @@ public class RenderUtil implements Util {
             }
         }
     }
+
+    public static void drawRoundedOutline(
+            GuiGraphics gg,
+            double x, double y,
+            double width, double height,
+            double radius,
+            float strokeWidth,
+            int color
+    ) {
+        int ix = (int) x;
+        int iy = (int) y;
+        int iw = (int) width;
+        int ih = (int) height;
+        int r  = (int) radius;
+
+        rect(gg, ix + r, iy, ix + iw - r, iy + strokeWidth, color);
+        rect(gg, ix, iy + r, ix + strokeWidth, iy + ih - r, color);
+        rect(gg, ix + iw - strokeWidth, iy + r, ix + iw, iy + ih - r, color);
+        rect(gg, ix + r, iy + ih - strokeWidth, ix + iw - r, iy + ih, color);
+
+        drawCornerOutline(gg, ix + r, iy + r, r, strokeWidth, color, 0);
+        drawCornerOutline(gg, ix + iw - r, iy + r, r, strokeWidth, color, 1);
+        drawCornerOutline(gg, ix + iw - r, iy + ih - r, r, strokeWidth, color, 2);
+        drawCornerOutline(gg, ix + r, iy + ih - r, r, strokeWidth, color, 3);
+    }
+
+    private static void drawCornerOutline(
+            GuiGraphics gg,
+            int cx, int cy,
+            int r,
+            float strokeWidth,
+            int color,
+            int quadrant
+    ) {
+        for (int dx = 0; dx <= r; dx++) {
+            for (int dy = 0; dy <= r; dy++) {
+                double distSq = dx * dx + dy * dy;
+                if (distSq > (r - strokeWidth) * (r - strokeWidth) && distSq <= r * r) {
+
+                    int x = cx;
+                    int y = cy;
+
+                    switch (quadrant) {
+                        case 0 -> { x -= dx; y -= dy; } // top-left
+                        case 1 -> { x += dx; y -= dy; } // top-right
+                        case 2 -> { x += dx; y += dy; } // bottom-right
+                        case 3 -> { x -= dx; y += dy; } // bottom-left
+                    }
+
+                    gg.fill(x, y, x + 1, y + 1, color);
+                }
+            }
+        }
+    }
 }
