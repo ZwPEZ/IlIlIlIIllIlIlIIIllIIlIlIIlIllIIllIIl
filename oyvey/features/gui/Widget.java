@@ -50,12 +50,19 @@ public class Widget
         this.context = context;
         this.drag(mouseX, mouseY);
         float totalItemHeight = this.open ? this.getTotalItemHeight() - 2.0f : 0.0f;
-        int color = ClickGui.getInstance().topColor.getValue().getRGB();
-        context.fill(this.x, this.y - 1, this.x + this.width, this.y + this.height - 6, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()).getRGB() : color);
+
+        // new rounded gui
+        int outlineColor = new Color(40, 40, 40).getRGB();
+        int backgroundColor = new Color(15, 15, 15).getRGB();
+        int textColor = ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()).getRGB() : ClickGui.getInstance().topColor.getValue().getRGB();
+
+        RenderUtil.drawRoundedRect(context, this.x, this.y - 1, this.width, this.height - 5, 4.5, outlineColor);
+        RenderUtil.drawRoundedRect(context, this.x + 1, this.y, this.width - 2, this.height - 7, 4.5, backgroundColor);
+
         if (this.open) {
             RenderUtil.rect(context, this.x, (float) this.y + 12.5f, this.x + this.width, (float) (this.y + this.height) + totalItemHeight, 0x77000000);
         }
-        drawString(this.getName(), (float) this.x + 3.0f, (float) this.y - 4.0f - (float) OyVeyGui.getClickGui().getTextOffset(), -1);
+        drawString(this.getName(), (float) this.x + 3.0f, (float) this.y - 4.0f - (float) OyVeyGui.getClickGui().getTextOffset(), textColor);
         ScissorUtil.enable(context, x, 0, x + width, mc.getWindow().getGuiScaledHeight());
 
         if (this.open) {

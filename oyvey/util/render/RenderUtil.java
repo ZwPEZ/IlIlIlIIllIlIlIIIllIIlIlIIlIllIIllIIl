@@ -250,4 +250,32 @@ public class RenderUtil implements Util {
         matrices.translate(pos.x() - camera.getPosition().x, pos.y() - camera.getPosition().y, pos.z() - camera.getPosition().z);
         return matrices;
     }
+
+    public static void drawRoundedRect(GuiGraphics context, double x, double y, double width, double height, double radius, int color) {
+        drawRoundedRect(context.pose(), x, y, width, height, radius, color);
+    }
+
+    public static void drawRoundedRect(PoseStack stack, double x, double y, double width, double height, double radius, int color) {
+        rectFilled(stack, (float) (x + radius), (float) y, (float) (x + width - radius), (float) (y + height), color);
+        rectFilled(stack, (float) x, (float) (y + radius), (float) (x + width), (float) (y + height - radius), color);
+        drawCirclePart(stack, x + radius, y + radius, radius, 180, 270, color);
+        drawCirclePart(stack, x + width - radius, y + radius, radius, 270, 360, color);
+        drawCirclePart(stack, x + width - radius, y + height - radius, radius, 0, 90, color);
+        drawCirclePart(stack, x + radius, y + height - radius, radius, 90, 180, color);
+    }
+
+    public static void drawCirclePart(PoseStack stack, double x, double y, double radius, int startAngle, int endAngle, int color) {
+        float f = (float) (color >> 24 & 255) / 255.0F;
+        float g = (float) (color >> 16 & 255) / 255.0F;
+        float h = (float) (color >> 8 & 255) / 255.0F;
+        float j = (float) (color & 255) / 255.0F;
+
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.addVertex(stack.last().pose(), (float) x, (float) y, 0.0F).setColor(g, h, j, f);
+        for (int i = startAngle; i <= endAngle; i++) {
+            float angle = (float) (i * Math.PI / 180.0D);
+            bufferBuilder.addVertex(stack.last().pose(), (float) (x + Math.cos(angle) * radius), (float) (y + Math.sin(angle) * radius), 0.0F).setColor(g, h, j, f);
+        }
+        Layers.getGlobalQuads().draw(bufferBuilder.buildOrThrow());
+    }
 }
