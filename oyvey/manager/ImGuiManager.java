@@ -16,7 +16,7 @@ public class ImGuiManager implements Util {
 
     public void init() {
         ImGui.createContext();
-        windowHandle = mc.getWindow().getHandle();
+        windowHandle = mc.getWindow().handle();
         implGlfw.init(windowHandle, true);
         implGl3.init();
     }
