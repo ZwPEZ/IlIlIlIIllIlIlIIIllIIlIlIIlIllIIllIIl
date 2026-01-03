@@ -116,13 +116,13 @@ public class RenderUtil implements Util {
 
     public static void rectFilled(PoseStack matrix, float x1, float y1, float x2, float y2, int color) {
         float i;
-        if (x1 < x2) {
+        if (x1 > x2) {
             i = x1;
             x1 = x2;
             x2 = i;
         }
 
-        if (y1 < y2) {
+        if (y1 > y2) {
             i = y1;
             y1 = y2;
             y2 = i;
@@ -257,7 +257,8 @@ public class RenderUtil implements Util {
 
     public static void drawRoundedRect(PoseStack stack, double x, double y, double width, double height, double radius, int color) {
         rectFilled(stack, (float) (x + radius), (float) y, (float) (x + width - radius), (float) (y + height), color);
-        rectFilled(stack, (float) x, (float) (y + radius), (float) (x + width), (float) (y + height - radius), color);
+        rectFilled(stack, (float) x, (float) (y + radius), (float) (x + radius), (float) (y + height - radius), color);
+        rectFilled(stack, (float) (x + width - radius), (float) (y + radius), (float) (x + width), (float) (y + height - radius), color);
         drawCirclePart(stack, x + radius, y + radius, radius, 180, 270, color);
         drawCirclePart(stack, x + width - radius, y + radius, radius, 270, 360, color);
         drawCirclePart(stack, x + width - radius, y + height - radius, radius, 0, 90, color);
@@ -270,7 +271,7 @@ public class RenderUtil implements Util {
         float h = (float) (color >> 8 & 255) / 255.0F;
         float j = (float) (color & 255) / 255.0F;
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         for (int i = startAngle; i < endAngle; i++) {
             double angle1 = Math.toRadians(i);
             double angle2 = Math.toRadians(i + 1);
@@ -283,8 +284,7 @@ public class RenderUtil implements Util {
             bufferBuilder.addVertex(stack.last().pose(), (float) x, (float) y, 0.0F).setColor(g, h, j, f);
             bufferBuilder.addVertex(stack.last().pose(), x1, y1, 0.0F).setColor(g, h, j, f);
             bufferBuilder.addVertex(stack.last().pose(), x2, y2, 0.0F).setColor(g, h, j, f);
-            bufferBuilder.addVertex(stack.last().pose(), x2, y2, 0.0F).setColor(g, h, j, f);
         }
-        Layers.getGlobalQuads().draw(bufferBuilder.buildOrThrow());
+        Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }
 }

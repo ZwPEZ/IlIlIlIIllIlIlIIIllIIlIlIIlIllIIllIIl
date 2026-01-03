@@ -9,9 +9,11 @@ import java.util.function.Function;
 
 import static me.alpha432.oyvey.util.render.Pipelines.GLOBAL_LINES_PIPELINE;
 import static me.alpha432.oyvey.util.render.Pipelines.GLOBAL_QUADS_PIPELINE;
+import static me.alpha432.oyvey.util.render.Pipelines.GLOBAL_TRIANGLES_PIPELINE;
 
 public class Layers {
     private static final RenderType GLOBAL_QUADS;
+    private static final RenderType GLOBAL_TRIANGLES;
     private static final Function<Double, RenderType> GLOBAL_LINES;
 
     public static RenderType getGlobalLines(double width) {
@@ -20,6 +22,10 @@ public class Layers {
 
     public static RenderType getGlobalQuads() {
         return GLOBAL_QUADS;
+    }
+
+    public static RenderType getGlobalTriangles() {
+        return GLOBAL_TRIANGLES;
     }
 
     private static RenderType.CompositeState.CompositeStateBuilder builder() {
@@ -32,6 +38,7 @@ public class Layers {
 
     static {
         GLOBAL_QUADS = RenderType.create("global_fill", 156, GLOBAL_QUADS_PIPELINE, empty());
+        GLOBAL_TRIANGLES = RenderType.create("global_triangles", 156, GLOBAL_TRIANGLES_PIPELINE, empty());
 
         GLOBAL_LINES = Util.memoize(l -> {
             RenderStateShard.LineStateShard width = new RenderStateShard.LineStateShard(OptionalDouble.of(l));
