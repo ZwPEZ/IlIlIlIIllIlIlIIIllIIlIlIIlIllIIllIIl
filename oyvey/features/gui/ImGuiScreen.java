@@ -19,4 +19,9 @@ public class ImGuiScreen extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // Do nothing to prevent the default background from rendering.
+    }
 }
