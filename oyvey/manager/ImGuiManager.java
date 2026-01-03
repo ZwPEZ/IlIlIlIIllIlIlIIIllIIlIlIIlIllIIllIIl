@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.util.traits.Util;
@@ -40,7 +41,15 @@ public class ImGuiManager implements Util {
 
         ImGui.endFrame();
         ImGui.render();
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableCull();
+
         implGl3.renderDrawData(ImGui.getDrawData());
+
+        RenderSystem.enableDepthTest();
     }
 
     public void destroy() {
