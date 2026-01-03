@@ -251,96 +251,52 @@ public class RenderUtil implements Util {
         return matrices;
     }
 
-    public static void drawRoundedRect(
-            GuiGraphics gg,
-            double x, double y,
-            double width, double height,
-            double radius,
-            int color
+    public static void drawSmoothRect(
+        float x, float y,
+        float width, float height,
+        float radius,
+        int color, int outlineColor, float outlineWidth
     ) {
-        float x1 = (float) x;
-        float y1 = (float) y;
-        float w = (float) width;
-        float h = (float) height;
-        float r = (float) radius;
-
-        gg.fill(Math.round(x1 + r), Math.round(y1), Math.round(x1 + w - r), Math.round(y1 + h), color);
-        gg.fill(Math.round(x1), Math.round(y1 + r), Math.round(x1 + r), Math.round(y1 + h - r), color);
-        gg.fill(Math.round(x1 + w - r), Math.round(y1 + r), Math.round(x1 + w), Math.round(y1 + h - r), color);
-
-        drawRoundCorner(x1 + r, y1 + r, r, color, 180);
-        drawRoundCorner(x1 + w - r, y1 + r, r, color, 270);
-        drawRoundCorner(x1 + w - r, y1 + h - r, r, color, 0);
-        drawRoundCorner(x1 + r, y1 + h - r, r, color, 90);
+        drawSmoothRect(x - outlineWidth, y - outlineWidth, width + outlineWidth * 2, height + outlineWidth * 2, radius, outlineColor);
+        drawSmoothRect(x, y, width, height, radius, color);
     }
 
-    private static void drawRoundCorner(float cx, float cy, float r, int color, int startAngle) {
+    public static void drawSmoothRect(
+            float x, float y,
+            float width, float height,
+            float radius,
+            int color
+    ) {
+        float x1 = x;
+        float y1 = y;
+        float x2 = x + width;
+        float y2 = y + height;
+
         float f = (float) (color >> 24 & 255) / 255.0F;
         float g = (float) (color >> 16 & 255) / 255.0F;
         float h = (float) (color >> 8 & 255) / 255.0F;
         float j = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.addVertex(cx, cy, 0.0F).setColor(g, h, j, f);
 
-        int segments = 16;
-        for (int i = 0; i <= segments; i++) {
-            double angle = Math.toRadians(startAngle + (i * 90.0 / segments));
-            float vx = cx + (float) (Math.cos(angle) * r);
-            float vy = cy + (float) (Math.sin(angle) * r);
-            bufferBuilder.addVertex(vx, vy, 0.0F).setColor(g, h, j, f);
+        bufferBuilder.addVertex(x1 + radius, y1 + radius, 0.0F).setColor(g, h, j, f);
+        for (int i = 0; i <= 16; i++) {
+            double angle = Math.toRadians(180 + i * 90.0 / 16);
+            bufferBuilder.addVertex(x1 + radius + (float)Math.cos(angle) * radius, y1 + radius + (float)Math.sin(angle) * radius, 0.0F).setColor(g, h, j, f);
         }
-
-        Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
-    }
-
-    public static void drawRoundedOutline(
-            GuiGraphics gg,
-            double x, double y,
-            double width, double height,
-            double radius,
-            float strokeWidth,
-            int color
-    ) {
-        float x1 = (float) x;
-        float y1 = (float) y;
-        float w = (float) width;
-        float h = (float) height;
-        float r = (float) radius;
-
-        rect(gg, x1 + r, y1, x1 + w - r, y1 + strokeWidth, color);
-        rect(gg, x1, y1 + r, x1 + strokeWidth, y1 + h - r, color);
-        rect(gg, x1 + w - strokeWidth, y1 + r, x1 + w, y1 + h - r, color);
-        rect(gg, x1 + r, y1 + h - strokeWidth, x1 + w - r, y1 + h, color);
-
-        drawRoundCornerOutline(x1 + r, y1 + r, r, strokeWidth, color, 180);
-        drawRoundCornerOutline(x1 + w - r, y1 + r, r, strokeWidth, color, 270);
-        drawRoundCornerOutline(x1 + w - r, y1 + h - r, r, strokeWidth, color, 0);
-        drawRoundCornerOutline(x1 + r, y1 + h - r, r, strokeWidth, color, 90);
-    }
-
-    private static void drawRoundCornerOutline(float cx, float cy, float r, float strokeWidth, int color, int startAngle) {
-        float f = (float) (color >> 24 & 255) / 255.0F;
-        float g = (float) (color >> 16 & 255) / 255.0F;
-        float h = (float) (color >> 8 & 255) / 255.0F;
-        float j = (float) (color & 255) / 255.0F;
-
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-
-        int segments = 16;
-        for (int i = 0; i <= segments; i++) {
-            double angle = Math.toRadians(startAngle + (i * 90.0 / segments));
-            float cos = (float)Math.cos(angle);
-            float sin = (float)Math.sin(angle);
-
-            float vx1 = cx + cos * r;
-            float vy1 = cy + sin * r;
-            bufferBuilder.addVertex(vx1, vy1, 0.0F).setColor(g, h, j, f);
-
-            float vx2 = cx + cos * (r - strokeWidth);
-            float vy2 = cy + sin * (r - strokeWidth);
-            bufferBuilder.addVertex(vx2, vy2, 0.0F).setColor(g, h, j, f);
+        for (int i = 0; i <= 16; i++) {
+            double angle = Math.toRadians(90 + i * 90.0 / 16);
+            bufferBuilder.addVertex(x1 + radius + (float)Math.cos(angle) * radius, y2 - radius + (float)Math.sin(angle) * radius, 0.0F).setColor(g, h, j, f);
         }
+        for (int i = 0; i <= 16; i++) {
+            double angle = Math.toRadians(i * 90.0 / 16);
+            bufferBuilder.addVertex(x2 - radius + (float)Math.cos(angle) * radius, y2 - radius + (float)Math.sin(angle) * radius, 0.0F).setColor(g, h, j, f);
+        }
+        for (int i = 0; i <= 16; i++) {
+            double angle = Math.toRadians(270 + i * 90.0 / 16);
+            bufferBuilder.addVertex(x2 - radius + (float)Math.cos(angle) * radius, y1 + radius + (float)Math.sin(angle) * radius, 0.0F).setColor(g, h, j, f);
+        }
+        bufferBuilder.addVertex(x1 + radius, y1 + radius, 0.0F).setColor(g, h, j, f);
 
         Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }

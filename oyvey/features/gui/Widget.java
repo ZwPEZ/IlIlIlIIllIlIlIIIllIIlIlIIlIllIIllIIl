@@ -55,8 +55,7 @@ public class Widget
         int backgroundColor = new Color(15, 15, 15).getRGB();
         int textColor = ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()).getRGB() : ClickGui.getInstance().topColor.getValue().getRGB();
 
-        RenderUtil.drawRoundedRect(context, this.x, this.y - 1, this.width, this.height - 5, 4.5f, backgroundColor);
-        RenderUtil.drawRoundedOutline(context, this.x, this.y - 1, this.width, this.height - 5, 4.5f, 1, outlineColor);
+        RenderUtil.drawSmoothRect(this.x, this.y - 1, this.width, this.height - 5, 7.5f, backgroundColor, outlineColor, 0.5f);
 
         if (this.open) {
             RenderUtil.rect(context, this.x, (float) this.y + 12.5f, this.x + this.width, (float) (this.y + this.height) + totalItemHeight, 0x77000000);
