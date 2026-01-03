@@ -258,51 +258,40 @@ public class RenderUtil implements Util {
             double radius,
             int color
     ) {
-        int ix = (int) x;
-        int iy = (int) y;
-        int iw = (int) width;
-        int ih = (int) height;
-        int r  = (int) radius;
+        float x1 = (float) x;
+        float y1 = (float) y;
+        float w = (float) width;
+        float h = (float) height;
+        float r = (float) radius;
 
-        // center
-        gg.fill(ix + r, iy, ix + iw - r, iy + ih, color);
+        gg.fill(Math.round(x1 + r), Math.round(y1), Math.round(x1 + w - r), Math.round(y1 + h), color);
+        gg.fill(Math.round(x1), Math.round(y1 + r), Math.round(x1 + r), Math.round(y1 + h - r), color);
+        gg.fill(Math.round(x1 + w - r), Math.round(y1 + r), Math.round(x1 + w), Math.round(y1 + h - r), color);
 
-        // sides
-        gg.fill(ix, iy + r, ix + r, iy + ih - r, color);
-        gg.fill(ix + iw - r, iy + r, ix + iw, iy + ih - r, color);
-
-        // corners
-        drawCorner(gg, ix + r, iy + r, r, color, 0);
-        drawCorner(gg, ix + iw - r, iy + r, r, color, 1);
-        drawCorner(gg, ix + iw - r, iy + ih - r, r, color, 2);
-        drawCorner(gg, ix + r, iy + ih - r, r, color, 3);
+        drawRoundCorner(gg.pose(), x1 + r, y1 + r, r, color, 180);
+        drawRoundCorner(gg.pose(), x1 + w - r, y1 + r, r, color, 270);
+        drawRoundCorner(gg.pose(), x1 + w - r, y1 + h - r, r, color, 0);
+        drawRoundCorner(gg.pose(), x1 + r, y1 + h - r, r, color, 90);
     }
 
-    private static void drawCorner(
-            GuiGraphics gg,
-            int cx, int cy,
-            int r,
-            int color,
-            int quadrant
-    ) {
-        for (int dx = 0; dx <= r; dx++) {
-            for (int dy = 0; dy <= r; dy++) {
-                if (dx * dx + dy * dy <= r * r) {
+    private static void drawRoundCorner(PoseStack matrix, float cx, float cy, float r, int color, int startAngle) {
+        float f = (float) (color >> 24 & 255) / 255.0F;
+        float g = (float) (color >> 16 & 255) / 255.0F;
+        float h = (float) (color >> 8 & 255) / 255.0F;
+        float j = (float) (color & 255) / 255.0F;
 
-                    int x = cx;
-                    int y = cy;
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.addVertex(matrix.last().pose(), cx, cy, 0.0F).setColor(g, h, j, f);
 
-                    switch (quadrant) {
-                        case 0 -> { x -= dx; y -= dy; } // top-left
-                        case 1 -> { x += dx; y -= dy; } // top-right
-                        case 2 -> { x += dx; y += dy; } // bottom-right
-                        case 3 -> { x -= dx; y += dy; } // bottom-left
-                    }
-
-                    gg.fill(x, y, x + 1, y + 1, color);
-                }
-            }
+        int segments = 16;
+        for (int i = 0; i <= segments; i++) {
+            double angle = Math.toRadians(startAngle + (i * 90.0 / segments));
+            float vx = cx + (float) (Math.cos(angle) * r);
+            float vy = cy + (float) (Math.sin(angle) * r);
+            bufferBuilder.addVertex(matrix.last().pose(), vx, vy, 0.0F).setColor(g, h, j, f);
         }
+
+        Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }
 
     public static void drawRoundedOutline(
@@ -313,49 +302,46 @@ public class RenderUtil implements Util {
             float strokeWidth,
             int color
     ) {
-        int ix = (int) x;
-        int iy = (int) y;
-        int iw = (int) width;
-        int ih = (int) height;
-        int r  = (int) radius;
+        float x1 = (float) x;
+        float y1 = (float) y;
+        float w = (float) width;
+        float h = (float) height;
+        float r = (float) radius;
 
-        rect(gg, ix + r, iy, ix + iw - r, iy + strokeWidth, color);
-        rect(gg, ix, iy + r, ix + strokeWidth, iy + ih - r, color);
-        rect(gg, ix + iw - strokeWidth, iy + r, ix + iw, iy + ih - r, color);
-        rect(gg, ix + r, iy + ih - strokeWidth, ix + iw - r, iy + ih, color);
+        rect(gg, x1 + r, y1, x1 + w - r, y1 + strokeWidth, color);
+        rect(gg, x1, y1 + r, x1 + strokeWidth, y1 + h - r, color);
+        rect(gg, x1 + w - strokeWidth, y1 + r, x1 + w, y1 + h - r, color);
+        rect(gg, x1 + r, y1 + h - strokeWidth, x1 + w - r, y1 + h, color);
 
-        drawCornerOutline(gg, ix + r, iy + r, r, strokeWidth, color, 0);
-        drawCornerOutline(gg, ix + iw - r, iy + r, r, strokeWidth, color, 1);
-        drawCornerOutline(gg, ix + iw - r, iy + ih - r, r, strokeWidth, color, 2);
-        drawCornerOutline(gg, ix + r, iy + ih - r, r, strokeWidth, color, 3);
+        drawRoundCornerOutline(gg.pose(), x1 + r, y1 + r, r, strokeWidth, color, 180);
+        drawRoundCornerOutline(gg.pose(), x1 + w - r, y1 + r, r, strokeWidth, color, 270);
+        drawRoundCornerOutline(gg.pose(), x1 + w - r, y1 + h - r, r, strokeWidth, color, 0);
+        drawRoundCornerOutline(gg.pose(), x1 + r, y1 + h - r, r, strokeWidth, color, 90);
     }
 
-    private static void drawCornerOutline(
-            GuiGraphics gg,
-            int cx, int cy,
-            int r,
-            float strokeWidth,
-            int color,
-            int quadrant
-    ) {
-        for (int dx = 0; dx <= r; dx++) {
-            for (int dy = 0; dy <= r; dy++) {
-                double distSq = dx * dx + dy * dy;
-                if (distSq > (r - strokeWidth) * (r - strokeWidth) && distSq <= r * r) {
+    private static void drawRoundCornerOutline(PoseStack matrix, float cx, float cy, float r, float strokeWidth, int color, int startAngle) {
+        float f = (float) (color >> 24 & 255) / 255.0F;
+        float g = (float) (color >> 16 & 255) / 255.0F;
+        float h = (float) (color >> 8 & 255) / 255.0F;
+        float j = (float) (color & 255) / 255.0F;
 
-                    int x = cx;
-                    int y = cy;
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-                    switch (quadrant) {
-                        case 0 -> { x -= dx; y -= dy; } // top-left
-                        case 1 -> { x += dx; y -= dy; } // top-right
-                        case 2 -> { x += dx; y += dy; } // bottom-right
-                        case 3 -> { x -= dx; y += dy; } // bottom-left
-                    }
+        int segments = 16;
+        for (int i = 0; i <= segments; i++) {
+            double angle = Math.toRadians(startAngle + (i * 90.0 / segments));
+            float cos = (float)Math.cos(angle);
+            float sin = (float)Math.sin(angle);
 
-                    gg.fill(x, y, x + 1, y + 1, color);
-                }
-            }
+            float vx1 = cx + cos * r;
+            float vy1 = cy + sin * r;
+            bufferBuilder.addVertex(matrix.last().pose(), vx1, vy1, 0.0F).setColor(g, h, j, f);
+
+            float vx2 = cx + cos * (r - strokeWidth);
+            float vy2 = cy + sin * (r - strokeWidth);
+            bufferBuilder.addVertex(matrix.last().pose(), vx2, vy2, 0.0F).setColor(g, h, j, f);
         }
+
+        Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
     }
 }
