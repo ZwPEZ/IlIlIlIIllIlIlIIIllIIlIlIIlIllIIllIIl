@@ -6,7 +6,7 @@ import me.alpha432.oyvey.features.gui.items.buttons.Button;
 import me.alpha432.oyvey.features.modules.client.ClickGui;
 import me.alpha432.oyvey.util.ColorUtil;
 import me.alpha432.oyvey.util.render.Animation;
-import me.alpha432.oyvey.util.render.RoundedUtil;
+import me.alpha432.oyvey.util.render.RenderUtil;
 import me.alpha432.oyvey.util.render.ScissorUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -58,10 +58,10 @@ public class Widget
         float totalItemHeight = getTotalItemHeight() - 2.0f;
         double animatedHeight = animation.getCurrent() * totalItemHeight;
 
-        int color = ClickGui.getInstance().topColor.getValue().getRGB();
-        RoundedUtil.rect(context, x, y - 1, width, height - 6, 3, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()) : new Color(color));
+        Color color = ClickGui.getInstance().topColor.getValue();
+        RenderUtil.horizontalGradient(context, x, y - 1, x + width, y + height - 6, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue()) : color, ClickGui.getInstance().rainbow.getValue() ? ColorUtil.rainbow(ClickGui.getInstance().rainbowHue.getValue() + 100) : color.darker());
         if (animatedHeight > 0)
-            RoundedUtil.rect(context, x, y + 12.5f, width, (float) (height - 12.5 + animatedHeight), 3, new Color(0x77000000, true));
+            RenderUtil.rect(context, x, y + 12.5f, x + width, (float) (y + height - 0.5f + animatedHeight), new Color(0x77000000, true).getRGB());
 
         drawString(this.getName(), (float) this.x + 3.0f, (float) this.y - 4.0f - (float) OyVeyGui.getClickGui().getTextOffset(), -1);
 
