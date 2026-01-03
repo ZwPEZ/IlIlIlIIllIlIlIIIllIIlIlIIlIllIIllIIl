@@ -268,27 +268,27 @@ public class RenderUtil implements Util {
         gg.fill(Math.round(x1), Math.round(y1 + r), Math.round(x1 + r), Math.round(y1 + h - r), color);
         gg.fill(Math.round(x1 + w - r), Math.round(y1 + r), Math.round(x1 + w), Math.round(y1 + h - r), color);
 
-        drawRoundCorner(gg.pose(), x1 + r, y1 + r, r, color, 180);
-        drawRoundCorner(gg.pose(), x1 + w - r, y1 + r, r, color, 270);
-        drawRoundCorner(gg.pose(), x1 + w - r, y1 + h - r, r, color, 0);
-        drawRoundCorner(gg.pose(), x1 + r, y1 + h - r, r, color, 90);
+        drawRoundCorner(x1 + r, y1 + r, r, color, 180);
+        drawRoundCorner(x1 + w - r, y1 + r, r, color, 270);
+        drawRoundCorner(x1 + w - r, y1 + h - r, r, color, 0);
+        drawRoundCorner(x1 + r, y1 + h - r, r, color, 90);
     }
 
-    private static void drawRoundCorner(PoseStack matrix, float cx, float cy, float r, int color, int startAngle) {
+    private static void drawRoundCorner(float cx, float cy, float r, int color, int startAngle) {
         float f = (float) (color >> 24 & 255) / 255.0F;
         float g = (float) (color >> 16 & 255) / 255.0F;
         float h = (float) (color >> 8 & 255) / 255.0F;
         float j = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.addVertex(matrix.last().pose(), cx, cy, 0.0F).setColor(g, h, j, f);
+        bufferBuilder.addVertex(cx, cy, 0.0F).setColor(g, h, j, f);
 
         int segments = 16;
         for (int i = 0; i <= segments; i++) {
             double angle = Math.toRadians(startAngle + (i * 90.0 / segments));
             float vx = cx + (float) (Math.cos(angle) * r);
             float vy = cy + (float) (Math.sin(angle) * r);
-            bufferBuilder.addVertex(matrix.last().pose(), vx, vy, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(vx, vy, 0.0F).setColor(g, h, j, f);
         }
 
         Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
@@ -313,13 +313,13 @@ public class RenderUtil implements Util {
         rect(gg, x1 + w - strokeWidth, y1 + r, x1 + w, y1 + h - r, color);
         rect(gg, x1 + r, y1 + h - strokeWidth, x1 + w - r, y1 + h, color);
 
-        drawRoundCornerOutline(gg.pose(), x1 + r, y1 + r, r, strokeWidth, color, 180);
-        drawRoundCornerOutline(gg.pose(), x1 + w - r, y1 + r, r, strokeWidth, color, 270);
-        drawRoundCornerOutline(gg.pose(), x1 + w - r, y1 + h - r, r, strokeWidth, color, 0);
-        drawRoundCornerOutline(gg.pose(), x1 + r, y1 + h - r, r, strokeWidth, color, 90);
+        drawRoundCornerOutline(x1 + r, y1 + r, r, strokeWidth, color, 180);
+        drawRoundCornerOutline(x1 + w - r, y1 + r, r, strokeWidth, color, 270);
+        drawRoundCornerOutline(x1 + w - r, y1 + h - r, r, strokeWidth, color, 0);
+        drawRoundCornerOutline(x1 + r, y1 + h - r, r, strokeWidth, color, 90);
     }
 
-    private static void drawRoundCornerOutline(PoseStack matrix, float cx, float cy, float r, float strokeWidth, int color, int startAngle) {
+    private static void drawRoundCornerOutline(float cx, float cy, float r, float strokeWidth, int color, int startAngle) {
         float f = (float) (color >> 24 & 255) / 255.0F;
         float g = (float) (color >> 16 & 255) / 255.0F;
         float h = (float) (color >> 8 & 255) / 255.0F;
@@ -335,11 +335,11 @@ public class RenderUtil implements Util {
 
             float vx1 = cx + cos * r;
             float vy1 = cy + sin * r;
-            bufferBuilder.addVertex(matrix.last().pose(), vx1, vy1, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(vx1, vy1, 0.0F).setColor(g, h, j, f);
 
             float vx2 = cx + cos * (r - strokeWidth);
             float vy2 = cy + sin * (r - strokeWidth);
-            bufferBuilder.addVertex(matrix.last().pose(), vx2, vy2, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(vx2, vy2, 0.0F).setColor(g, h, j, f);
         }
 
         Layers.getGlobalTriangles().draw(bufferBuilder.buildOrThrow());
