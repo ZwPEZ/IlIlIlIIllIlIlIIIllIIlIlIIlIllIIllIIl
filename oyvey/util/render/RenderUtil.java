@@ -270,11 +270,20 @@ public class RenderUtil implements Util {
         float h = (float) (color >> 8 & 255) / 255.0F;
         float j = (float) (color & 255) / 255.0F;
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.addVertex(stack.last().pose(), (float) x, (float) y, 0.0F).setColor(g, h, j, f);
-        for (int i = startAngle; i <= endAngle; i++) {
-            float angle = (float) (i * Math.PI / 180.0D);
-            bufferBuilder.addVertex(stack.last().pose(), (float) (x + Math.cos(angle) * radius), (float) (y + Math.sin(angle) * radius), 0.0F).setColor(g, h, j, f);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        for (int i = startAngle; i < endAngle; i++) {
+            double angle1 = Math.toRadians(i);
+            double angle2 = Math.toRadians(i + 1);
+
+            float x1 = (float) (x + Math.cos(angle1) * radius);
+            float y1 = (float) (y + Math.sin(angle1) * radius);
+            float x2 = (float) (x + Math.cos(angle2) * radius);
+            float y2 = (float) (y + Math.sin(angle2) * radius);
+
+            bufferBuilder.addVertex(stack.last().pose(), (float) x, (float) y, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(stack.last().pose(), x1, y1, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(stack.last().pose(), x2, y2, 0.0F).setColor(g, h, j, f);
+            bufferBuilder.addVertex(stack.last().pose(), x2, y2, 0.0F).setColor(g, h, j, f);
         }
         Layers.getGlobalQuads().draw(bufferBuilder.buildOrThrow());
     }
