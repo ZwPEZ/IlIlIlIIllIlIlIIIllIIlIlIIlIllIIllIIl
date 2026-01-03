@@ -28,10 +28,11 @@ class Pipelines {
             .build();
 
     static final RenderPipeline GLOBAL_TRIANGLES_PIPELINE = RenderPipeline.builder(DEBUG_FILLED_SNIPPET)
-            .withLocation("pipeline/global_fill_pipeline")
+            .withLocation("pipeline/global_triangles_pipeline")
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .withBlend(BlendFunction.TRANSLUCENT)
+            .withTransparency(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
             .withDepthWrite(false)
             .withCull(false)
             .build();
