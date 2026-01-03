@@ -5,6 +5,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.RenderStateShard;
 
 import static net.minecraft.client.renderer.RenderPipelines.DEBUG_FILLED_SNIPPET;
 import static net.minecraft.client.renderer.RenderPipelines.LINES_SNIPPET;
