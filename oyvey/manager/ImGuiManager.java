@@ -6,8 +6,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
 import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.features.modules.Module;
-import me.alpha432.oyvey.util.Util;
-import net.minecraft.client.MinecraftClient;
+import me.alpha432.oyvey.util.traits.Util;
 
 public class ImGuiManager implements Util {
     private final ImGuiImplGlfw implGlfw = new ImGuiImplGlfw();
@@ -17,7 +16,7 @@ public class ImGuiManager implements Util {
 
     public void init() {
         ImGui.createContext();
-        windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
+        windowHandle = mc.getWindow().getHandle();
         implGlfw.init(windowHandle, true);
         implGl3.init();
     }
