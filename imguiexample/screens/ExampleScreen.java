@@ -22,6 +22,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private float animatedIndicatorWidth = 0f;
     private final float[] hoverAlphas = new float[Module.Category.values().length];
     private final float animationSpeed = 15f;
+    private float topBarHeight = 0f;
 
     public ExampleScreen() {
         super(Component.literal("Example IMGUI Screen"));
@@ -92,6 +93,8 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         // Dummy to take up space
         ImGui.dummy(rightWidth, ImGui.getTextLineHeight());
         ImGui.dummy(0, 2);
+
+        topBarHeight = ImGui.getCursorPosY();
     }
 
     private void renderTopSeparator() {
@@ -117,8 +120,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
     private void renderModuleSections() {
         float topSeparatorY = ImGui.getCursorPosY();
-        float bottomSeparatorY = ImGui.getWindowSizeY() - 50.0f;
-        float contentHeight = bottomSeparatorY - topSeparatorY - 20;
+        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight;
         float spacing = 10.0f;
         float totalSpacing = spacing * 4;
         float sectionWidth = (ImGui.getWindowSizeX() - totalSpacing) / 3;
@@ -180,16 +182,14 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private void renderBottomSeparator() {
         float windowPosX = ImGui.getWindowPosX();
         float windowWidth = ImGui.getWindowSizeX();
-        float bottomPadding = 50.0f;
-        float bottomLineY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - bottomPadding;
+        float bottomBarY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - topBarHeight;
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
-        ImGui.getWindowDrawList().addLine(windowPosX, bottomLineY, windowPosX + windowWidth, bottomLineY, borderColor);
+        ImGui.getWindowDrawList().addLine(windowPosX, bottomBarY, windowPosX + windowWidth, bottomBarY, borderColor);
     }
 
     private void renderCategoryButtons() {
-        float bottomPadding = 50.0f;
-        float categoryButtonY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - bottomPadding + 15;
         float buttonHeight = 20.0f;
+        float categoryButtonY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - (topBarHeight / 2) - (buttonHeight / 2);
         float buttonSpacing = 10.0f;
         float horizontalPadding = 20.0f;
         float rounding = 4.0f;
@@ -262,11 +262,11 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             animatedIndicatorWidth += (targetIndicatorWidth - animatedIndicatorWidth) * deltaTime * animationSpeed;
         }
 
-        // Draw the animated indicator and pulsing glow
+        // Draw the animated "breathing" outline
         float time = (float) ImGui.getTime();
-        float glowAlpha = (float) (Math.sin(time * 4.0f) * 0.5f + 0.5f) * 0.3f + 0.2f;
-        int glowColor = ImGui.getColorU32(0.9f, 0.2f, 0.3f, glowAlpha);
-        ImGui.getWindowDrawList().addRectFilled(animatedIndicatorX, categoryButtonY, animatedIndicatorX + animatedIndicatorWidth, categoryButtonY + buttonHeight, glowColor, rounding);
+        float glowAlpha = (float) (Math.sin(time * 6.0f) * 0.5f + 0.5f);
+        int glowColor = ImGui.getColorU32(255f / 255f, 110f / 255f, 110f / 255f, glowAlpha);
+        ImGui.getWindowDrawList().addRect(animatedIndicatorX -1, categoryButtonY -1, animatedIndicatorX + animatedIndicatorWidth + 1, categoryButtonY + buttonHeight + 1, glowColor, rounding + 1, 0, 1.5f);
     }
 
     @Override
