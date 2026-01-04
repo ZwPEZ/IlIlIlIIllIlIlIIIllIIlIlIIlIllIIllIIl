@@ -112,8 +112,10 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private void renderModuleSections() {
         float topSeparatorY = ImGui.getCursorPosY();
         float bottomSeparatorY = ImGui.getWindowSizeY() - 50.0f;
-        float contentHeight = bottomSeparatorY - topSeparatorY - 10;
-        float sectionWidth = (ImGui.getWindowSizeX() - 40) / 3;
+        float contentHeight = bottomSeparatorY - topSeparatorY - 20;
+        float spacing = 10.0f;
+        float totalSpacing = spacing * 4;
+        float sectionWidth = (ImGui.getWindowSizeX() - totalSpacing) / 3;
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         float rounding = 4.0f;
 
@@ -121,12 +123,15 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         int moduleCount = modules.size();
         int modulesPerSection = (int) Math.ceil(moduleCount / 3.0);
 
+        float windowPosX = ImGui.getWindowPosX();
+        float windowPosY = ImGui.getWindowPosY();
+
         // Left Section
-        float leftX = ImGui.getWindowPosX() + 10;
-        float leftY = ImGui.getWindowPosY() + topSeparatorY + 5;
-        ImGui.getWindowDrawList().addRect(leftX, leftY, leftX + sectionWidth, leftY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(15, topSeparatorY + 10);
-        ImGui.beginChild("LeftSection", sectionWidth - 10, contentHeight - 10, false);
+        float leftX = windowPosX + spacing;
+        float sectionY = windowPosY + topSeparatorY + spacing;
+        ImGui.getWindowDrawList().addRect(leftX, sectionY, leftX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
+        ImGui.setCursorPos(spacing * 1.5f, topSeparatorY + spacing * 1.5f);
+        ImGui.beginChild("LeftSection", sectionWidth - spacing, contentHeight - spacing, false);
         for (int i = 0; i < modulesPerSection && i < moduleCount; i++) {
             Module module = modules.get(i);
             if (ImGui.checkbox(module.getName(), module.isEnabled())) {
@@ -135,14 +140,13 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         }
         ImGui.endChild();
 
-        ImGui.sameLine(0, 20);
+        ImGui.sameLine(0, spacing);
 
         // Middle Section
-        float middleX = ImGui.getWindowPosX() + 20 + sectionWidth;
-        float middleY = ImGui.getWindowPosY() + topSeparatorY + 5;
-        ImGui.getWindowDrawList().addRect(middleX, middleY, middleX + sectionWidth, middleY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(25 + sectionWidth, topSeparatorY + 10);
-        ImGui.beginChild("MiddleSection", sectionWidth - 10, contentHeight - 10, false);
+        float middleX = leftX + sectionWidth + spacing;
+        ImGui.getWindowDrawList().addRect(middleX, sectionY, middleX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
+        ImGui.setCursorPos(spacing * 2.5f + sectionWidth, topSeparatorY + spacing * 1.5f);
+        ImGui.beginChild("MiddleSection", sectionWidth - spacing, contentHeight - spacing, false);
         for (int i = modulesPerSection; i < modulesPerSection * 2 && i < moduleCount; i++) {
             Module module = modules.get(i);
             if (ImGui.checkbox(module.getName(), module.isEnabled())) {
@@ -151,14 +155,13 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         }
         ImGui.endChild();
 
-        ImGui.sameLine(0, 20);
+        ImGui.sameLine(0, spacing);
 
         // Right Section
-        float rightX = ImGui.getWindowPosX() + 30 + sectionWidth * 2;
-        float rightY = ImGui.getWindowPosY() + topSeparatorY + 5;
-        ImGui.getWindowDrawList().addRect(rightX, rightY, rightX + sectionWidth, rightY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(35 + sectionWidth * 2, topSeparatorY + 10);
-        ImGui.beginChild("RightSection", sectionWidth - 10, contentHeight - 10, false);
+        float rightX = middleX + sectionWidth + spacing;
+        ImGui.getWindowDrawList().addRect(rightX, sectionY, rightX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
+        ImGui.setCursorPos(spacing * 3.5f + sectionWidth * 2, topSeparatorY + spacing * 1.5f);
+        ImGui.beginChild("RightSection", sectionWidth - spacing, contentHeight - spacing, false);
         for (int i = modulesPerSection * 2; i < moduleCount; i++) {
             Module module = modules.get(i);
             if (ImGui.checkbox(module.getName(), module.isEnabled())) {
