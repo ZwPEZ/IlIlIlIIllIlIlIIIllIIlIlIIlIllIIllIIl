@@ -24,14 +24,13 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private static final float ACCENT_G = 110f / 255f;
     private static final float ACCENT_B = 110f / 255f;
     private static final float SPACING = 10.0f;
-    private static final float VERTICAL_PADDING = 10.0f;
+    private static final float BAR_HEIGHT = 40.0f;
 
     // Animation state variables
     private final float[] hoverAlphas = new float[Module.Category.values().length];
     private final float[] selectionFades = new float[Module.Category.values().length];
     private final Map<Module, Float> moduleSelectionFades = new HashMap<>();
     private final float animationSpeed = 15f;
-    private float topBarHeight = 0f;
 
     public ExampleScreen() {
         super(Component.literal("Example IMGUI Screen"));
@@ -70,7 +69,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         float rightWidth = ImGui.calcTextSize(right).x;
         float totalWidth = leftWidth + rightWidth;
 
-        ImGui.setCursorPosX((ImGui.getWindowSizeX() - totalWidth) * 0.5f);
+        float titleY = (BAR_HEIGHT - ImGui.getTextLineHeight()) / 2;
+        ImGui.setCursorPosY(titleY);
+        ImGui.setCursorPosX((ImGui.getWindowSizeX() - totalWidth) / 2.0f);
 
         ImGui.text(left);
         ImGui.sameLine(0, 0);
@@ -98,15 +99,10 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             ImGui.getWindowDrawList().addText(x, y, color, s);
             x += charWidth;
         }
-
-        // Dummy to take up space
-        ImGui.dummy(rightWidth, ImGui.getTextLineHeight());
-        ImGui.dummy(0, 2);
-
-        topBarHeight = ImGui.getCursorPosY();
     }
 
     private void renderTopSeparator() {
+        ImGui.setCursorPosY(BAR_HEIGHT);
         float windowPosX = ImGui.getWindowPosX();
         float windowWidth = ImGui.getWindowSizeX();
         float separatorY = ImGui.getCursorScreenPosY();
@@ -123,8 +119,8 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     }
 
     private void renderModuleSections() {
-        float topSeparatorY = ImGui.getCursorPosY();
-        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight - (VERTICAL_PADDING * 2);
+        float topSeparatorY = BAR_HEIGHT;
+        float contentHeight = ImGui.getWindowSizeY() - (BAR_HEIGHT * 2) - (SPACING * 2);
         float totalSpacing = SPACING * 4;
         float sectionWidth = (ImGui.getWindowSizeX() - totalSpacing) / 3;
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
@@ -199,7 +195,6 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             }
 
             ImGui.popStyleColor();
-            ImGui.popID();
 
             if (ImGui.isItemHovered()) {
                 ImGui.beginTooltip();
@@ -211,29 +206,40 @@ public final class ExampleScreen extends Screen implements RenderInterface {
                 ImGui.openPopup(module.getName() + " Settings");
             }
 
+            float[] windowSize = new float[2];
+            ImGui.getIO().getDisplaySize(windowSize);
+            ImGui.setNextWindowPos(windowSize[0] / 2, windowSize[1] / 2, ImGuiCond.Always, 0.5f, 0.5f);
+
             if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize)) {
                 ImGui.text(module.getName() + " Settings");
                 ImGui.separator();
                 ImGui.text("This is where the settings for " + module.getName() + " will be.");
-                if (ImGui.button("Close")) {
+
+                float buttonWidth = 100;
+                float buttonX = (ImGui.getWindowWidth() - buttonWidth) / 2;
+                ImGui.setCursorPosX(buttonX);
+
+                if (ImGui.button("Close", buttonWidth, 20)) {
                     ImGui.closeCurrentPopup();
                 }
                 ImGui.endPopup();
             }
+            ImGui.popID();
+            ImGui.dummy(0, 5);
         }
     }
 
     private void renderBottomSeparator() {
         float windowPosX = ImGui.getWindowPosX();
         float windowWidth = ImGui.getWindowSizeX();
-        float bottomBarY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - topBarHeight;
+        float bottomBarY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - BAR_HEIGHT;
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         ImGui.getWindowDrawList().addLine(windowPosX, bottomBarY, windowPosX + windowWidth, bottomBarY, borderColor);
     }
 
     private void renderCategoryButtons() {
         float buttonHeight = 20.0f;
-        float categoryButtonY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - (topBarHeight / 2) - (buttonHeight / 2);
+        float categoryButtonY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - (BAR_HEIGHT / 2) - (buttonHeight / 2);
         float buttonSpacing = 10.0f;
         float horizontalPadding = 20.0f;
         float rounding = 4.0f;
