@@ -38,6 +38,18 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         if (selectedCategory == null && Module.Category.values().length > 0) {
             selectedCategory = Module.Category.values()[0];
         }
+
+        // Initialize animation states to prevent color flash on open
+        for (int i = 0; i < Module.Category.values().length; i++) {
+            if (Module.Category.values()[i] == selectedCategory) {
+                selectionFades[i] = 1.0f;
+            }
+        }
+        for (Module module : ExampleMod.moduleManager.getModules()) {
+            if (module.isEnabled()) {
+                moduleSelectionFades.put(module, 1.0f);
+            }
+        }
     }
 
     @Override
@@ -205,8 +217,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             }
 
             ImGui.setNextWindowPos(ImGui.getIO().getDisplaySizeX() / 2, ImGui.getIO().getDisplaySizeY() / 2, ImGuiCond.Always, 0.5f, 0.5f);
+            ImGui.setNextWindowSize(300, 150, ImGuiCond.Once);
 
-            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)) {
+            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar)) {
                 String title = module.getName() + " Settings";
                 float titleWidth = ImGui.calcTextSize(title).x;
                 ImGui.setCursorPosX((ImGui.getWindowSizeX() - titleWidth) / 2.0f);
