@@ -1,5 +1,6 @@
 package de.florianmichael.imguiexample.screens;
 
+import de.florianmichael.imguiexample.ExampleMod;
 import de.florianmichael.imguiexample.features.modules.Module;
 import de.florianmichael.imguiexample.imgui.RenderInterface;
 import de.florianmichael.imguiexample.manager.ModuleManager;
@@ -16,8 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class ExampleScreen extends Screen implements RenderInterface {
-    private final ModuleManager moduleManager;
-    private Module.Category selectedCategory;
+    private static Module.Category selectedCategory;
 
     // Constants
     private static final float ACCENT_R = 255f / 255f;
@@ -35,9 +35,8 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
     public ExampleScreen() {
         super(Component.literal("Example IMGUI Screen"));
-        this.moduleManager = new ModuleManager();
-        if (Module.Category.values().length > 0) {
-            this.selectedCategory = Module.Category.values()[0];
+        if (selectedCategory == null && Module.Category.values().length > 0) {
+            selectedCategory = Module.Category.values()[0];
         }
     }
 
@@ -127,7 +126,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         float rounding = 4.0f;
 
-        List<Module> modules = moduleManager.getModulesByCategory(selectedCategory);
+        List<Module> modules = ExampleMod.moduleManager.getModulesByCategory(selectedCategory);
         int moduleCount = modules.size();
         int baseSize = moduleCount / 3;
         int remainder = moduleCount % 3;
