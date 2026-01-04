@@ -1,107 +1,165 @@
 package de.florianmichael.imguiexample.screens;
 
+import de.florianmichael.imguiexample.features.modules.Module;
 import de.florianmichael.imguiexample.imgui.RenderInterface;
+import de.florianmichael.imguiexample.manager.ModuleManager;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
+
 public final class ExampleScreen extends Screen implements RenderInterface {
+    private final ModuleManager moduleManager;
+    private Module.Category selectedCategory;
+
     public ExampleScreen() {
-        super(Component.literal("mKys50oVNZFC9f07FkrwAgCEhT9fqv69TeKhN1Z8VJTDfE8jOJ"));
+        super(Component.literal("Example IMGUI Screen"));
+        this.moduleManager = new ModuleManager();
+        if (Module.Category.values().length > 0) {
+            this.selectedCategory = Module.Category.values()[0];
+        }
     }
 
     @Override
     public void render(ImGuiIO io) {
-        float MenuWidth = 850;
-        float MenuHeight = 520;
+        float menuWidth = 850;
+        float menuHeight = 520;
 
-        float centerX = (ImGui.getIO().getDisplaySizeX() - MenuWidth) / 2.0f;
-        float centerY = (ImGui.getIO().getDisplaySizeY() - MenuHeight) / 2.0f;
+        float centerX = (ImGui.getIO().getDisplaySizeX() - menuWidth) / 2.0f;
+        float centerY = (ImGui.getIO().getDisplaySizeY() - menuHeight) / 2.0f;
 
-        ImGui.setNextWindowSize(MenuWidth, MenuHeight, ImGuiCond.Once);
+        ImGui.setNextWindowSize(menuWidth, menuHeight, ImGuiCond.Once);
         ImGui.setNextWindowPos(centerX, centerY, ImGuiCond.Once);
-        ImGui.setNextWindowSize(MenuWidth, MenuHeight, ImGuiCond.Once);
 
-        if (ImGui.begin("Siphfm5JfiGW3sWYyxdCxHIG8D8zLoFXRt9e5FPBh2OFSQuV6B", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar)) {
-            float glowR = 255f / 255f;
-            float glowG = 110f / 255f;
-            float glowB = 110f / 255f;
+        if (ImGui.begin("Demon Client", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar)) {
+            renderTitle();
+            renderTopSeparator();
+            renderModuleSections();
+            renderBottomSeparator();
+            renderCategoryButtons();
+            ImGui.end();
+        }
+    }
 
-            String left = "Demon ";
-            String right = "Client";
+    private void renderTitle() {
+        String left = "Demon ";
+        String right = "Client";
+        float totalWidth = ImGui.calcTextSize(left).x + ImGui.calcTextSize(right).x;
+        ImGui.setCursorPosX((ImGui.getWindowSizeX() - totalWidth) * 0.5f);
+        ImGui.text(left);
+        ImGui.sameLine(0, 0);
+        ImGui.text(right);
+        ImGui.dummy(0, 2);
+    }
 
-            float leftWidth = ImGui.calcTextSize(left).x;
-            float rightWidth = ImGui.calcTextSize(right).x;
-            float totalWidth = leftWidth + rightWidth;
+    private void renderTopSeparator() {
+        float windowPosX = ImGui.getWindowPosX();
+        float windowPosY = ImGui.getCursorScreenPosY();
+        float windowWidth = ImGui.getWindowSizeX();
+        int lineColor = ImGui.getColorU32(ImGuiCol.Border);
+        ImGui.getWindowDrawList().addLine(windowPosX, windowPosY, windowPosX + windowWidth, windowPosY, lineColor);
+    }
 
-            ImGui.setCursorPosX((ImGui.getWindowSizeX() - totalWidth) * 0.5f);
+    private void renderModuleSections() {
+        float topSeparatorY = ImGui.getCursorPosY();
+        float bottomSeparatorY = ImGui.getWindowSizeY() - 50.0f;
+        float contentHeight = bottomSeparatorY - topSeparatorY - 10;
 
-            ImGui.text(left);
-            ImGui.sameLine(0, 0);
+        List<Module> modules = moduleManager.getModulesByCategory(selectedCategory);
+        int moduleCount = modules.size();
+        int modulesPerSection = (int) Math.ceil(moduleCount / 3.0);
 
-            float time = (float) ImGui.getTime();
+        float sectionWidth = (ImGui.getWindowSizeX() - 40) / 3;
 
-            float x = ImGui.getCursorScreenPosX();
-            float y = ImGui.getCursorScreenPosY();
+        ImGui.setCursorPos(10, topSeparatorY + 5);
+        ImGui.beginChild("LeftSection", sectionWidth, contentHeight, false);
+        for (int i = 0; i < modulesPerSection && i < moduleCount; i++) {
+            Module module = modules.get(i);
+            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
+                module.toggle();
+            }
+        }
+        ImGui.endChild();
 
-            float r1 = 255f / 255f, g1 = 110f / 255f, b1 = 110f / 255f;
-            float r2 = 255f / 255f, g2 = 180f / 255f, b2 = 180f / 255f;
+        ImGui.sameLine(0, 10);
 
-            for (int i = 0; i < right.length(); i++) {
-                char c = right.charAt(i);
-                String s = String.valueOf(c);
+        ImGui.beginChild("MiddleSection", sectionWidth, contentHeight, false);
+        for (int i = modulesPerSection; i < modulesPerSection * 2 && i < moduleCount; i++) {
+            Module module = modules.get(i);
+            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
+                module.toggle();
+            }
+        }
+        ImGui.endChild();
 
-                float charWidth = ImGui.calcTextSize(s).x;
+        ImGui.sameLine(0, 10);
 
-                float wave = (float) Math.sin(time * 3.0f + i * 0.6f) * 0.5f + 0.5f;
+        ImGui.beginChild("RightSection", sectionWidth, contentHeight, false);
+        for (int i = modulesPerSection * 2; i < moduleCount; i++) {
+            Module module = modules.get(i);
+            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
+                module.toggle();
+            }
+        }
+        ImGui.endChild();
+    }
 
-                float r = r1 + (r2 - r1) * wave;
-                float g = g1 + (g2 - g1) * wave;
-                float b = b1 + (b2 - b1) * wave;
+    private void renderBottomSeparator() {
+        float windowPosX = ImGui.getWindowPosX();
+        float windowWidth = ImGui.getWindowSizeX();
+        float bottomPadding = 50.0f;
+        float bottomLineY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - bottomPadding;
+        int borderColor = ImGui.getColorU32(ImGuiCol.Border);
+        ImGui.getWindowDrawList().addLine(windowPosX, bottomLineY, windowPosX + windowWidth, bottomLineY, borderColor);
+    }
 
-                int color = ImGui.getColorU32(r, g, b, 1.0f);
-                ImGui.getWindowDrawList().addText(x, y, color, s);
+    private void renderCategoryButtons() {
+        float bottomPadding = 50.0f;
+        float categoryButtonY = ImGui.getWindowSizeY() - bottomPadding + 15;
 
-                x += charWidth;
+        Module.Category[] categories = Module.Category.values();
+        float totalButtonWidth = 0;
+        for (Module.Category category : categories) {
+            totalButtonWidth += ImGui.calcTextSize(category.getName()).x + 20;
+        }
+        totalButtonWidth += (categories.length - 1) * 10;
+
+        float currentX = (ImGui.getWindowSizeX() - totalButtonWidth) / 2.0f;
+
+        ImGui.setCursorPosY(categoryButtonY);
+
+        for (int i = 0; i < categories.length; i++) {
+            Module.Category category = categories[i];
+
+            if (i == 0) {
+                ImGui.setCursorPosX(currentX);
+            } else {
+                ImGui.sameLine(0, 10);
             }
 
-            ImGui.dummy(rightWidth, ImGui.getTextLineHeight());
-            ImGui.dummy(0, 2);
+            if (category == selectedCategory) {
+                ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(0.3f, 0.3f, 0.7f, 1.0f));
+                ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(0.4f, 0.4f, 0.8f, 1.0f));
+                ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.getColorU32(0.5f, 0.5f, 0.9f, 1.0f));
+            }
 
-            float windowPosX = ImGui.getWindowPosX();
-            float windowPosY = ImGui.getCursorScreenPosY();
-            float windowWidth = ImGui.getWindowSizeX();
+            if (ImGui.button(category.getName())) {
+                selectedCategory = category;
+            }
 
-            int glowLineColor = ImGui.getColorU32(glowR, glowG, glowB, 1.0f);
-            ImGui.getWindowDrawList().addLine(windowPosX, windowPosY, windowPosX + windowWidth, windowPosY, glowLineColor);
-
-            float glowTopY = windowPosY - 27;
-            float glowBottomY = windowPosY;
-
-            int colorTop = ImGui.getColorU32(glowR, glowG, glowB, 0.0f);
-            int colorBottom = ImGui.getColorU32(glowR, glowG, glowB, 0.13f);
-
-            ImGui.getWindowDrawList().addRectFilledMultiColor(windowPosX, glowTopY, windowPosX + windowWidth, glowBottomY, colorTop, colorTop, colorBottom, colorBottom);
-
-            float bottomPadding = 50.0f;
-            float bottomLineY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - bottomPadding;
-
-            int borderColor = ImGui.getColorU32(ImGuiCol.Border);
-
-            ImGui.getWindowDrawList().addLine(windowPosX, bottomLineY, windowPosX + windowWidth, bottomLineY, borderColor);
-
-            ImGui.end();
+            if (category == selectedCategory) {
+                ImGui.popStyleColor(3);
+            }
         }
     }
 
     @Override
     public boolean isPauseScreen() {
-        return false; // Only relevant in singleplayer
+        return false;
     }
 }
