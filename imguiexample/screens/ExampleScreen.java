@@ -169,7 +169,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
     private void renderModules(List<Module> modules) {
         float buttonHeight = 25f;
-        float width = ImGui.getWindowWidth() - 10;
+        float width = ImGui.getWindowWidth() - 20;
+
+        ImGui.setCursorPosY(ImGui.getCursorPosY() + 10);
 
         for (Module module : modules) {
             ImGui.pushID(module.getName());
@@ -190,6 +192,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
             ImGui.pushStyleColor(ImGuiCol.Text, animatedTextColor);
 
+            ImGui.setCursorPosX((ImGui.getWindowWidth() - width) / 2);
             if (ImGui.button(module.getName(), width, buttonHeight)) {
                 module.toggle();
             }
