@@ -30,6 +30,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private final float[] hoverAlphas = new float[Module.Category.values().length];
     private final float[] selectionFades = new float[Module.Category.values().length];
     private final Map<Module, Float> moduleSelectionFades = new HashMap<>();
+    private final Map<String, Float> buttonHoverAlphas = new HashMap<>();
     private final float animationSpeed = 15f;
 
     public ExampleScreen() {
@@ -190,14 +191,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             float textB = b + (ACCENT_B - b) * moduleSelectionFades.get(module);
             int animatedTextColor = ImGui.getColorU32(textR, textG, textB, 1.0f);
 
-            ImGui.pushStyleColor(ImGuiCol.Text, animatedTextColor);
-
-            ImGui.setCursorPosX((ImGui.getWindowWidth() - width) / 2);
-            if (ImGui.button(module.getName(), width, buttonHeight)) {
+            if (customButton(module.getName(), width, buttonHeight, animatedTextColor)) {
                 module.toggle();
             }
-
-            ImGui.popStyleColor();
 
             if (ImGui.isItemHovered()) {
                 ImGui.beginTooltip();
@@ -209,20 +205,14 @@ public final class ExampleScreen extends Screen implements RenderInterface {
                 ImGui.openPopup(module.getName() + " Settings");
             }
 
-            float[] windowSize = new float[2];
-            ImGui.getIO().getDisplaySize(windowSize);
-            ImGui.setNextWindowPos(windowSize[0] / 2, windowSize[1] / 2, ImGuiCond.Always, 0.5f, 0.5f);
+            ImGui.setNextWindowPos(ImGui.getIO().getDisplaySizeX() / 2, ImGui.getIO().getDisplaySizeY() / 2, ImGuiCond.Always, 0.5f, 0.5f);
 
             if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize)) {
                 ImGui.text(module.getName() + " Settings");
                 ImGui.separator();
                 ImGui.text("This is where the settings for " + module.getName() + " will be.");
 
-                float buttonWidth = 100;
-                float buttonX = (ImGui.getWindowWidth() - buttonWidth) / 2;
-                ImGui.setCursorPosX(buttonX);
-
-                if (ImGui.button("Close", buttonWidth, 20)) {
+                if (customButton("Close", 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
                     ImGui.closeCurrentPopup();
                 }
                 ImGui.endPopup();
@@ -230,6 +220,40 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             ImGui.popID();
             ImGui.dummy(0, 5);
         }
+    }
+
+    private boolean customButton(String text, float width, float height, int textColor) {
+        float posX = (ImGui.getWindowWidth() - width) / 2;
+        ImGui.setCursorPosX(posX);
+
+        float screenPosX = ImGui.getCursorScreenPosX();
+        float screenPosY = ImGui.getCursorScreenPosY();
+
+        boolean hovered = ImGui.isMouseHoveringRect(screenPosX, screenPosY, screenPosX + width, screenPosY + height);
+        boolean clicked = hovered && ImGui.isMouseClicked(0);
+
+        float hoverAlpha = buttonHoverAlphas.getOrDefault(text, 0f);
+        if (hovered) {
+            hoverAlpha = Math.min(1.0f, hoverAlpha + ImGui.getIO().getDeltaTime() * animationSpeed);
+        } else {
+            hoverAlpha = Math.max(0.0f, hoverAlpha - ImGui.getIO().getDeltaTime() * animationSpeed);
+        }
+        buttonHoverAlphas.put(text, hoverAlpha);
+
+        int bgColor = ImGui.getColorU32(0.15f, 0.15f, 0.15f, 0.5f + (hoverAlpha * 0.3f));
+        int borderColor = ImGui.getColorU32(ImGuiCol.Border);
+
+        ImGui.getWindowDrawList().addRectFilled(screenPosX, screenPosY, screenPosX + width, screenPosY + height, bgColor, 4.0f);
+        ImGui.getWindowDrawList().addRect(screenPosX, screenPosY, screenPosX + width, screenPosY + height, borderColor, 4.0f);
+
+        float textWidth = ImGui.calcTextSize(text).x;
+        float textX = screenPosX + (width - textWidth) / 2;
+        float textY = screenPosY + (height - ImGui.getTextLineHeight()) / 2;
+        ImGui.getWindowDrawList().addText(textX, textY, textColor, text);
+
+        ImGui.dummy(width, height);
+
+        return clicked;
     }
 
     private void renderBottomSeparator() {
