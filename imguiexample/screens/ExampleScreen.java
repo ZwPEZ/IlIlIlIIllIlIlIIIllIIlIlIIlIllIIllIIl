@@ -11,15 +11,25 @@ import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ExampleScreen extends Screen implements RenderInterface {
     private final ModuleManager moduleManager;
     private Module.Category selectedCategory;
 
+    // Constants
+    private static final float ACCENT_R = 255f / 255f;
+    private static final float ACCENT_G = 110f / 255f;
+    private static final float ACCENT_B = 110f / 255f;
+    private static final float SPACING = 10.0f;
+    private static final float VERTICAL_PADDING = 10.0f;
+
     // Animation state variables
     private final float[] hoverAlphas = new float[Module.Category.values().length];
     private final float[] selectionFades = new float[Module.Category.values().length];
+    private final Map<Module, Float> moduleSelectionFades = new HashMap<>();
     private final float animationSpeed = 15f;
     private float topBarHeight = 0f;
 
@@ -101,81 +111,116 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         float windowWidth = ImGui.getWindowSizeX();
         float separatorY = ImGui.getCursorScreenPosY();
 
-        // Glow colors
-        float glowR = 255f / 255f;
-        float glowG = 110f / 255f;
-        float glowB = 110f / 255f;
-
         // Separator line
-        int lineColor = ImGui.getColorU32(glowR, glowG, glowB, 1.0f);
+        int lineColor = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 1.0f);
         ImGui.getWindowDrawList().addLine(windowPosX, separatorY, windowPosX + windowWidth, separatorY, lineColor);
 
         // Glow effect
         float glowTopY = separatorY - 27;
-        int colorTop = ImGui.getColorU32(glowR, glowG, glowB, 0.0f);
-        int colorBottom = ImGui.getColorU32(glowR, glowG, glowB, 0.13f);
+        int colorTop = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 0.0f);
+        int colorBottom = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 0.13f);
         ImGui.getWindowDrawList().addRectFilledMultiColor(windowPosX, glowTopY, windowPosX + windowWidth, separatorY, colorTop, colorTop, colorBottom, colorBottom);
     }
 
     private void renderModuleSections() {
         float topSeparatorY = ImGui.getCursorPosY();
-        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight - 10;
-        float spacing = 10.0f;
-        float totalSpacing = spacing * 4;
+        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight - (VERTICAL_PADDING * 2);
+        float totalSpacing = SPACING * 4;
         float sectionWidth = (ImGui.getWindowSizeX() - totalSpacing) / 3;
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         float rounding = 4.0f;
 
         List<Module> modules = moduleManager.getModulesByCategory(selectedCategory);
         int moduleCount = modules.size();
-        int modulesPerSection = (int) Math.ceil(moduleCount / 3.0);
+        int baseSize = moduleCount / 3;
+        int remainder = moduleCount % 3;
+
+        int firstEnd = baseSize + (remainder > 0 ? 1 : 0);
+        int secondEnd = firstEnd + baseSize + (remainder > 1 ? 1 : 0);
 
         float windowPosX = ImGui.getWindowPosX();
         float windowPosY = ImGui.getWindowPosY();
 
         // Left Section
-        float leftX = windowPosX + spacing;
-        float sectionY = windowPosY + topSeparatorY + spacing;
+        float leftX = windowPosX + SPACING;
+        float sectionY = windowPosY + topSeparatorY + SPACING;
         ImGui.getWindowDrawList().addRect(leftX, sectionY, leftX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(spacing * 1.5f, topSeparatorY + spacing * 1.5f);
-        ImGui.beginChild("LeftSection", sectionWidth - spacing, contentHeight - spacing, false);
-        for (int i = 0; i < modulesPerSection && i < moduleCount; i++) {
-            Module module = modules.get(i);
-            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
-                module.toggle();
-            }
-        }
+        ImGui.setCursorPos(SPACING, topSeparatorY + SPACING);
+        ImGui.beginChild("LeftSection", sectionWidth, contentHeight, false);
+        renderModules(modules.subList(0, firstEnd));
         ImGui.endChild();
 
-        ImGui.sameLine(0, spacing);
+        ImGui.sameLine(0, SPACING);
 
         // Middle Section
-        float middleX = leftX + sectionWidth + spacing;
+        float middleX = leftX + sectionWidth + SPACING;
         ImGui.getWindowDrawList().addRect(middleX, sectionY, middleX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(spacing * 2.5f + sectionWidth, topSeparatorY + spacing * 1.5f);
-        ImGui.beginChild("MiddleSection", sectionWidth - spacing, contentHeight - spacing, false);
-        for (int i = modulesPerSection; i < modulesPerSection * 2 && i < moduleCount; i++) {
-            Module module = modules.get(i);
-            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
-                module.toggle();
-            }
-        }
+        ImGui.setCursorPos(SPACING * 2 + sectionWidth, topSeparatorY + SPACING);
+        ImGui.beginChild("MiddleSection", sectionWidth, contentHeight, false);
+        renderModules(modules.subList(firstEnd, secondEnd));
         ImGui.endChild();
 
-        ImGui.sameLine(0, spacing);
+        ImGui.sameLine(0, SPACING);
 
         // Right Section
-        float rightX = middleX + sectionWidth + spacing;
+        float rightX = middleX + sectionWidth + SPACING;
         ImGui.getWindowDrawList().addRect(rightX, sectionY, rightX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
-        ImGui.setCursorPos(spacing * 3.5f + sectionWidth * 2, topSeparatorY + spacing * 1.5f);
-        ImGui.beginChild("RightSection", sectionWidth - spacing, contentHeight - spacing, false);
-        for (int i = modulesPerSection * 2; i < moduleCount; i++) {
-            Module module = modules.get(i);
-            if (ImGui.checkbox(module.getName(), module.isEnabled())) {
+        ImGui.setCursorPos(SPACING * 3 + sectionWidth * 2, topSeparatorY + SPACING);
+        ImGui.beginChild("RightSection", sectionWidth, contentHeight, false);
+        renderModules(modules.subList(secondEnd, moduleCount));
+        ImGui.endChild();
+    }
+
+    private void renderModules(List<Module> modules) {
+        float buttonHeight = 25f;
+        float width = ImGui.getWindowWidth() - 10;
+
+        for (Module module : modules) {
+            ImGui.pushID(module.getName());
+            float targetSelection = module.isEnabled() ? 1.0f : 0.0f;
+            moduleSelectionFades.put(module, moduleSelectionFades.getOrDefault(module, 0f) + (targetSelection - moduleSelectionFades.getOrDefault(module, 0f)) * ImGui.getIO().getDeltaTime() * animationSpeed);
+
+            // Interpolate text color
+            int textColor = ImGui.getColorU32(ImGuiCol.Text);
+
+            float r = (textColor >> 0 & 0xFF) / 255f;
+            float g = (textColor >> 8 & 0xFF) / 255f;
+            float b = (textColor >> 16 & 0xFF) / 255f;
+
+            float textR = r + (ACCENT_R - r) * moduleSelectionFades.get(module);
+            float textG = g + (ACCENT_G - g) * moduleSelectionFades.get(module);
+            float textB = b + (ACCENT_B - b) * moduleSelectionFades.get(module);
+            int animatedTextColor = ImGui.getColorU32(textR, textG, textB, 1.0f);
+
+            ImGui.pushStyleColor(ImGuiCol.Text, animatedTextColor);
+
+            if (ImGui.button(module.getName(), width, buttonHeight)) {
                 module.toggle();
             }
+
+            ImGui.popStyleColor();
+            ImGui.popID();
+
+            if (ImGui.isItemHovered()) {
+                ImGui.beginTooltip();
+                ImGui.text(module.getDescription());
+                ImGui.endTooltip();
+            }
+
+            if (ImGui.isItemClicked(1)) {
+                ImGui.openPopup(module.getName() + " Settings");
+            }
+
+            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize)) {
+                ImGui.text(module.getName() + " Settings");
+                ImGui.separator();
+                ImGui.text("This is where the settings for " + module.getName() + " will be.");
+                if (ImGui.button("Close")) {
+                    ImGui.closeCurrentPopup();
+                }
+                ImGui.endPopup();
+            }
         }
-        ImGui.endChild();
     }
 
     private void renderBottomSeparator() {
@@ -230,20 +275,19 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             }
 
             // Draw background
-            int bgColor = ImGui.getColorU32(0.2f, 0.2f, 0.2f, 0.5f + (hoverAlphas[i] * 0.3f));
+            int bgColor = ImGui.getColorU32(0.15f, 0.15f, 0.15f, 0.5f + (hoverAlphas[i] * 0.3f));
             ImGui.getWindowDrawList().addRectFilled(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, bgColor, rounding);
 
             // Interpolate colors for text and outline
-            float accentR = 255f / 255f, accentG = 110f / 255f, accentB = 110f / 255f;
             int textColor = ImGui.getColorU32(ImGuiCol.Text);
 
             float r = (textColor >> 0 & 0xFF) / 255f;
             float g = (textColor >> 8 & 0xFF) / 255f;
             float b = (textColor >> 16 & 0xFF) / 255f;
 
-            float textR = r + (accentR - r) * selectionFades[i];
-            float textG = g + (accentG - g) * selectionFades[i];
-            float textB = b + (accentB - b) * selectionFades[i];
+            float textR = r + (ACCENT_R - r) * selectionFades[i];
+            float textG = g + (ACCENT_G - g) * selectionFades[i];
+            float textB = b + (ACCENT_B - b) * selectionFades[i];
             int animatedTextColor = ImGui.getColorU32(textR, textG, textB, 1.0f);
 
             int outlineColor = defaultBorderColor;
@@ -251,9 +295,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             g = (outlineColor >> 8 & 0xFF) / 255f;
             b = (outlineColor >> 16 & 0xFF) / 255f;
 
-            float outlineR = r + (accentR - r) * selectionFades[i];
-            float outlineG = g + (accentG - g) * selectionFades[i];
-            float outlineB = b + (accentB - b) * selectionFades[i];
+            float outlineR = r + (ACCENT_R - r) * selectionFades[i];
+            float outlineG = g + (ACCENT_G - g) * selectionFades[i];
+            float outlineB = b + (ACCENT_B - b) * selectionFades[i];
             int animatedOutlineColor = ImGui.getColorU32(outlineR, outlineG, outlineB, 1.0f);
 
             // Draw outline
