@@ -206,12 +206,33 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
             ImGui.setNextWindowPos(ImGui.getIO().getDisplaySizeX() / 2, ImGui.getIO().getDisplaySizeY() / 2, ImGuiCond.Always, 0.5f, 0.5f);
 
-            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize)) {
-                ImGui.text(module.getName() + " Settings");
-                ImGui.separator();
+            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar)) {
+                String title = module.getName() + " Settings";
+                float titleWidth = ImGui.calcTextSize(title).x;
+                ImGui.setCursorPosX((ImGui.getWindowSizeX() - titleWidth) / 2.0f);
+                ImGui.text(title);
+
+                // Top Separator
+                float modalPosX = ImGui.getWindowPosX();
+                float modalWidth = ImGui.getWindowSizeX();
+                ImGui.setCursorPosY(ImGui.getCursorPosY() + 4);
+                float separatorY = ImGui.getCursorScreenPosY();
+                int lineColor = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 1.0f);
+                ImGui.getWindowDrawList().addLine(modalPosX, separatorY, modalPosX + modalWidth, separatorY, lineColor);
+                float glowTopY = separatorY - 27;
+                int colorTop = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 0.0f);
+                int colorBottom = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 0.13f);
+                ImGui.getWindowDrawList().addRectFilledMultiColor(modalPosX, glowTopY, modalPosX + modalWidth, separatorY, colorTop, colorTop, colorBottom, colorBottom);
+
                 ImGui.text("This is where the settings for " + module.getName() + " will be.");
 
-                if (customButton("Close", 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
+                // Bottom Separator
+                ImGui.setCursorPosY(ImGui.getWindowSizeY() - 30);
+                float bottomSeparatorY = ImGui.getCursorScreenPosY();
+                ImGui.getWindowDrawList().addLine(modalPosX, bottomSeparatorY, modalPosX + modalWidth, bottomSeparatorY, ImGui.getColorU32(ImGuiCol.Border));
+
+                ImGui.setCursorPosY(ImGui.getWindowSizeY() - 25);
+                if (customButton("X", 20, 20, ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 1.0f))) {
                     ImGui.closeCurrentPopup();
                 }
                 ImGui.endPopup();
