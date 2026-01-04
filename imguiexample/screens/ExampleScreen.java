@@ -18,9 +18,8 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private Module.Category selectedCategory;
 
     // Animation state variables
-    private float animatedIndicatorX = -1f;
-    private float animatedIndicatorWidth = 0f;
     private final float[] hoverAlphas = new float[Module.Category.values().length];
+    private final float[] selectionFades = new float[Module.Category.values().length];
     private final float animationSpeed = 15f;
     private float topBarHeight = 0f;
 
@@ -120,7 +119,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
     private void renderModuleSections() {
         float topSeparatorY = ImGui.getCursorPosY();
-        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight;
+        float contentHeight = ImGui.getWindowSizeY() - topSeparatorY - topBarHeight - 10;
         float spacing = 10.0f;
         float totalSpacing = spacing * 4;
         float sectionWidth = (ImGui.getWindowSizeX() - totalSpacing) / 3;
@@ -193,12 +192,11 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         float buttonSpacing = 10.0f;
         float horizontalPadding = 20.0f;
         float rounding = 4.0f;
-        int borderColor = ImGui.getColorU32(ImGuiCol.Border);
+        int defaultBorderColor = ImGui.getColorU32(ImGuiCol.Border);
         float deltaTime = ImGui.getIO().getDeltaTime();
 
         Module.Category[] categories = Module.Category.values();
 
-        // Pre-calculate all button widths and total width
         float[] buttonWidths = new float[categories.length];
         float totalWidth = 0;
         for (int i = 0; i < categories.length; i++) {
@@ -208,8 +206,6 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         totalWidth += (categories.length - 1) * buttonSpacing;
 
         float currentX = ImGui.getWindowPosX() + (ImGui.getWindowSizeX() - totalWidth) / 2.0f;
-        float targetIndicatorX = 0;
-        float targetIndicatorWidth = 0;
 
         for (int i = 0; i < categories.length; i++) {
             Module.Category category = categories[i];
@@ -218,55 +214,59 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             float buttonX = currentX;
             float buttonY = categoryButtonY;
 
-            // Check for hover and click
             boolean hovered = ImGui.isMouseHoveringRect(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight);
             if (hovered && ImGui.isMouseClicked(0)) {
                 selectedCategory = category;
             }
 
-            // Update hover alpha for smooth animation
+            // Animate hover and selection
+            float targetSelection = (category == selectedCategory) ? 1.0f : 0.0f;
+            selectionFades[i] += (targetSelection - selectionFades[i]) * deltaTime * animationSpeed;
+
             if (hovered) {
                 hoverAlphas[i] = Math.min(1.0f, hoverAlphas[i] + deltaTime * animationSpeed);
             } else {
                 hoverAlphas[i] = Math.max(0.0f, hoverAlphas[i] - deltaTime * animationSpeed);
             }
 
-            // Draw background, animated on hover
+            // Draw background
             int bgColor = ImGui.getColorU32(0.2f, 0.2f, 0.2f, 0.5f + (hoverAlphas[i] * 0.3f));
             ImGui.getWindowDrawList().addRectFilled(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, bgColor, rounding);
 
+            // Interpolate colors for text and outline
+            float accentR = 255f / 255f, accentG = 110f / 255f, accentB = 110f / 255f;
+            int textColor = ImGui.getColorU32(ImGuiCol.Text);
+
+            float r = (textColor >> 0 & 0xFF) / 255f;
+            float g = (textColor >> 8 & 0xFF) / 255f;
+            float b = (textColor >> 16 & 0xFF) / 255f;
+
+            float textR = r + (accentR - r) * selectionFades[i];
+            float textG = g + (accentG - g) * selectionFades[i];
+            float textB = b + (accentB - b) * selectionFades[i];
+            int animatedTextColor = ImGui.getColorU32(textR, textG, textB, 1.0f);
+
+            int outlineColor = defaultBorderColor;
+            r = (outlineColor >> 0 & 0xFF) / 255f;
+            g = (outlineColor >> 8 & 0xFF) / 255f;
+            b = (outlineColor >> 16 & 0xFF) / 255f;
+
+            float outlineR = r + (accentR - r) * selectionFades[i];
+            float outlineG = g + (accentG - g) * selectionFades[i];
+            float outlineB = b + (accentB - b) * selectionFades[i];
+            int animatedOutlineColor = ImGui.getColorU32(outlineR, outlineG, outlineB, 1.0f);
+
             // Draw outline
-            ImGui.getWindowDrawList().addRect(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, borderColor, rounding);
+            ImGui.getWindowDrawList().addRect(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, animatedOutlineColor, rounding);
 
             // Draw text
             float textWidth = ImGui.calcTextSize(name).x;
             float textX = buttonX + (buttonWidth - textWidth) / 2.0f;
             float textY = buttonY + (buttonHeight - ImGui.getTextLineHeight()) / 2.0f;
-            ImGui.getWindowDrawList().addText(textX, textY, ImGui.getColorU32(ImGuiCol.Text), name);
-
-            // Find position of selected category for the animated indicator
-            if (category == selectedCategory) {
-                targetIndicatorX = buttonX;
-                targetIndicatorWidth = buttonWidth;
-            }
+            ImGui.getWindowDrawList().addText(textX, textY, animatedTextColor, name);
 
             currentX += buttonWidth + buttonSpacing;
         }
-
-        // Animate the selection indicator
-        if (animatedIndicatorX == -1f) { // Initialize first time
-            animatedIndicatorX = targetIndicatorX;
-            animatedIndicatorWidth = targetIndicatorWidth;
-        } else { // Lerp to target
-            animatedIndicatorX += (targetIndicatorX - animatedIndicatorX) * deltaTime * animationSpeed;
-            animatedIndicatorWidth += (targetIndicatorWidth - animatedIndicatorWidth) * deltaTime * animationSpeed;
-        }
-
-        // Draw the animated "breathing" outline
-        float time = (float) ImGui.getTime();
-        float glowAlpha = (float) (Math.sin(time * 6.0f) * 0.5f + 0.5f);
-        int glowColor = ImGui.getColorU32(255f / 255f, 110f / 255f, 110f / 255f, glowAlpha);
-        ImGui.getWindowDrawList().addRect(animatedIndicatorX -1, categoryButtonY -1, animatedIndicatorX + animatedIndicatorWidth + 1, categoryButtonY + buttonHeight + 1, glowColor, rounding + 1, 0, 1.5f);
     }
 
     @Override
