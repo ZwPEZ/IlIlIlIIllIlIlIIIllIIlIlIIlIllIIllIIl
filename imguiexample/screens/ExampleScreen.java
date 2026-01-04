@@ -49,20 +49,64 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private void renderTitle() {
         String left = "Demon ";
         String right = "Client";
-        float totalWidth = ImGui.calcTextSize(left).x + ImGui.calcTextSize(right).x;
+
+        float leftWidth = ImGui.calcTextSize(left).x;
+        float rightWidth = ImGui.calcTextSize(right).x;
+        float totalWidth = leftWidth + rightWidth;
+
         ImGui.setCursorPosX((ImGui.getWindowSizeX() - totalWidth) * 0.5f);
+
         ImGui.text(left);
         ImGui.sameLine(0, 0);
-        ImGui.text(right);
+
+        // Animated "Client" text
+        float time = (float) ImGui.getTime();
+        float x = ImGui.getCursorScreenPosX();
+        float y = ImGui.getCursorScreenPosY();
+
+        float r1 = 255f / 255f, g1 = 110f / 255f, b1 = 110f / 255f;
+        float r2 = 255f / 255f, g2 = 180f / 255f, b2 = 180f / 255f;
+
+        for (int i = 0; i < right.length(); i++) {
+            char c = right.charAt(i);
+            String s = String.valueOf(c);
+            float charWidth = ImGui.calcTextSize(s).x;
+
+            float wave = (float) Math.sin(time * 3.0f + i * 0.6f) * 0.5f + 0.5f;
+
+            float r = r1 + (r2 - r1) * wave;
+            float g = g1 + (g2 - g1) * wave;
+            float b = b1 + (b2 - b1) * wave;
+
+            int color = ImGui.getColorU32(r, g, b, 1.0f);
+            ImGui.getWindowDrawList().addText(x, y, color, s);
+            x += charWidth;
+        }
+
+        // Dummy to take up space
+        ImGui.dummy(rightWidth, ImGui.getTextLineHeight());
         ImGui.dummy(0, 2);
     }
 
     private void renderTopSeparator() {
         float windowPosX = ImGui.getWindowPosX();
-        float windowPosY = ImGui.getCursorScreenPosY();
         float windowWidth = ImGui.getWindowSizeX();
-        int lineColor = ImGui.getColorU32(ImGuiCol.Border);
-        ImGui.getWindowDrawList().addLine(windowPosX, windowPosY, windowPosX + windowWidth, windowPosY, lineColor);
+        float separatorY = ImGui.getCursorScreenPosY();
+
+        // Glow colors
+        float glowR = 255f / 255f;
+        float glowG = 110f / 255f;
+        float glowB = 110f / 255f;
+
+        // Separator line
+        int lineColor = ImGui.getColorU32(glowR, glowG, glowB, 1.0f);
+        ImGui.getWindowDrawList().addLine(windowPosX, separatorY, windowPosX + windowWidth, separatorY, lineColor);
+
+        // Glow effect
+        float glowTopY = separatorY - 27;
+        int colorTop = ImGui.getColorU32(glowR, glowG, glowB, 0.0f);
+        int colorBottom = ImGui.getColorU32(glowR, glowG, glowB, 0.13f);
+        ImGui.getWindowDrawList().addRectFilledMultiColor(windowPosX, glowTopY, windowPosX + windowWidth, separatorY, colorTop, colorTop, colorBottom, colorBottom);
     }
 
     private void renderModuleSections() {
