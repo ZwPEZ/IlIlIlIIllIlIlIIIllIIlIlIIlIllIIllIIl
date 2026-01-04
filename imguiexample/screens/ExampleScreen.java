@@ -182,41 +182,50 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
     private void renderCategoryButtons() {
         float bottomPadding = 50.0f;
-        float categoryButtonY = ImGui.getWindowSizeY() - bottomPadding + 15;
+        float categoryButtonY = ImGui.getWindowPosY() + ImGui.getWindowSizeY() - bottomPadding + 15;
+        float buttonHeight = 20.0f;
+        float buttonSpacing = 10.0f;
+        float horizontalPadding = 20.0f;
 
         Module.Category[] categories = Module.Category.values();
-        float totalButtonWidth = 0;
+        float totalWidth = 0;
         for (Module.Category category : categories) {
-            totalButtonWidth += ImGui.calcTextSize(category.getName()).x + 20;
+            totalWidth += ImGui.calcTextSize(category.getName()).x + horizontalPadding;
         }
-        totalButtonWidth += (categories.length - 1) * 10;
+        totalWidth += (categories.length - 1) * buttonSpacing;
 
-        float currentX = (ImGui.getWindowSizeX() - totalButtonWidth) / 2.0f;
+        float currentX = ImGui.getWindowPosX() + (ImGui.getWindowSizeX() - totalWidth) / 2.0f;
 
-        ImGui.setCursorPosY(categoryButtonY);
+        for (Module.Category category : categories) {
+            String name = category.getName();
+            float buttonWidth = ImGui.calcTextSize(name).x + horizontalPadding;
+            float buttonX = currentX;
+            float buttonY = categoryButtonY;
 
-        for (int i = 0; i < categories.length; i++) {
-            Module.Category category = categories[i];
+            boolean hovered = ImGui.isMouseHoveringRect(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight);
+            boolean clicked = hovered && ImGui.isMouseClicked(0);
 
-            if (i == 0) {
-                ImGui.setCursorPosX(currentX);
-            } else {
-                ImGui.sameLine(0, 10);
-            }
-
+            int color;
             if (category == selectedCategory) {
-                ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(0.3f, 0.3f, 0.7f, 1.0f));
-                ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(0.4f, 0.4f, 0.8f, 1.0f));
-                ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.getColorU32(0.5f, 0.5f, 0.9f, 1.0f));
+                float time = (float) ImGui.getTime();
+                float alpha = (float) (Math.sin(time * 4.0f) * 0.5f + 0.5f) * 0.3f + 0.2f;
+                color = ImGui.getColorU32(0.9f, 0.2f, 0.3f, alpha);
+                ImGui.getWindowDrawList().addRectFilled(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, color, 4.0f);
             }
 
-            if (ImGui.button(category.getName())) {
+            color = hovered ? ImGui.getColorU32(0.4f, 0.4f, 0.4f, 0.5f) : ImGui.getColorU32(0.2f, 0.2f, 0.2f, 0.5f);
+            ImGui.getWindowDrawList().addRectFilled(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, color, 4.0f);
+
+            float textWidth = ImGui.calcTextSize(name).x;
+            float textX = buttonX + (buttonWidth - textWidth) / 2.0f;
+            float textY = buttonY + (buttonHeight - ImGui.getTextLineHeight()) / 2.0f;
+            ImGui.getWindowDrawList().addText(textX, textY, ImGui.getColorU32(ImGuiCol.Text), name);
+
+            if (clicked) {
                 selectedCategory = category;
             }
 
-            if (category == selectedCategory) {
-                ImGui.popStyleColor(3);
-            }
+            currentX += buttonWidth + buttonSpacing;
         }
     }
 
