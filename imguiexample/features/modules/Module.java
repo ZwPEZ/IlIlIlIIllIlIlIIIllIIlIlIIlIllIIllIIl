@@ -5,18 +5,20 @@ import de.florianmichael.imguiexample.features.Feature;
 public class Module extends Feature {
     private final String description;
     private final Category category;
+    private final Section section;
     private boolean enabled;
-    private boolean drawn;
+    private boolean hidden;
     private int bind;
     private String displayName;
 
-    public Module(String name, String description, Category category) {
+    public Module(String name, String description, Category category, Section section) {
         super(name);
         this.displayName = name;
         this.description = description;
         this.category = category;
+        this.section = section;
         this.enabled = false;
-        this.drawn = true;
+        this.hidden = false;
         this.bind = -1;
     }
 
@@ -79,16 +81,20 @@ public class Module extends Feature {
         return this.description;
     }
 
-    public boolean isDrawn() {
-        return this.drawn;
+    public boolean isHidden() {
+        return this.hidden;
     }
 
-    public void setDrawn(boolean drawn) {
-        this.drawn = drawn;
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     public Category getCategory() {
         return this.category;
+    }
+
+    public Section getSection() {
+        return this.section;
     }
 
     public int getBind() {

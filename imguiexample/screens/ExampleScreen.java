@@ -2,6 +2,7 @@ package de.florianmichael.imguiexample.screens;
 
 import de.florianmichael.imguiexample.ExampleMod;
 import de.florianmichael.imguiexample.features.modules.Module;
+import de.florianmichael.imguiexample.features.modules.Section;
 import de.florianmichael.imguiexample.imgui.RenderInterface;
 import de.florianmichael.imguiexample.manager.ModuleManager;
 import imgui.ImGui;
@@ -138,13 +139,11 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         float rounding = 4.0f;
 
-        List<Module> modules = ExampleMod.moduleManager.getModulesByCategory(selectedCategory);
-        int moduleCount = modules.size();
-        int baseSize = moduleCount / 3;
-        int remainder = moduleCount % 3;
+        List<Module> modules = ExampleMod.moduleManager.getModulesByCategory(selectedCategory).stream().filter(m -> !m.isHidden()).collect(Collectors.toList());
 
-        int firstEnd = baseSize + (remainder > 0 ? 1 : 0);
-        int secondEnd = firstEnd + baseSize + (remainder > 1 ? 1 : 0);
+        List<Module> leftModules = modules.stream().filter(m -> m.getSection() == Section.LEFT).collect(Collectors.toList());
+        List<Module> middleModules = modules.stream().filter(m -> m.getSection() == Section.MIDDLE).collect(Collectors.toList());
+        List<Module> rightModules = modules.stream().filter(m -> m.getSection() == Section.RIGHT).collect(Collectors.toList());
 
         float windowPosX = ImGui.getWindowPosX();
         float windowPosY = ImGui.getWindowPosY();
@@ -155,7 +154,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         ImGui.getWindowDrawList().addRect(leftX, sectionY, leftX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
         ImGui.setCursorPos(SPACING, topSeparatorY + SPACING);
         ImGui.beginChild("LeftSection", sectionWidth, contentHeight, false);
-        renderModules(modules.subList(0, firstEnd));
+        renderModules(leftModules);
         ImGui.endChild();
 
         ImGui.sameLine(0, SPACING);
@@ -165,7 +164,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         ImGui.getWindowDrawList().addRect(middleX, sectionY, middleX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
         ImGui.setCursorPos(SPACING * 2 + sectionWidth, topSeparatorY + SPACING);
         ImGui.beginChild("MiddleSection", sectionWidth, contentHeight, false);
-        renderModules(modules.subList(firstEnd, secondEnd));
+        renderModules(middleModules);
         ImGui.endChild();
 
         ImGui.sameLine(0, SPACING);
@@ -175,7 +174,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         ImGui.getWindowDrawList().addRect(rightX, sectionY, rightX + sectionWidth, sectionY + contentHeight, borderColor, rounding);
         ImGui.setCursorPos(SPACING * 3 + sectionWidth * 2, topSeparatorY + SPACING);
         ImGui.beginChild("RightSection", sectionWidth, contentHeight, false);
-        renderModules(modules.subList(secondEnd, moduleCount));
+        renderModules(rightModules);
         ImGui.endChild();
     }
 
@@ -237,7 +236,17 @@ public final class ExampleScreen extends Screen implements RenderInterface {
                 int colorBottom = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 0.13f);
                 ImGui.getWindowDrawList().addRectFilledMultiColor(modalPosX, glowTopY, modalPosX + modalWidth, separatorY, colorTop, colorTop, colorBottom, colorBottom);
 
-                ImGui.text("This is where the settings for " + module.getName() + " will be.");
+                ImGui.setCursorPosY(ImGui.getCursorPosY() + 10);
+                if (customToggleButton("Hidden", module.isHidden(), 100, 20)) {
+                    module.setHidden(!module.isHidden());
+                }
+
+                ImGui.dummy(0, 5);
+
+                String bindText = "Keybind: " + (module.getBind() == -1 ? "None" : "TODO");
+                if (customButton(bindText, 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
+                    // TODO: Implement keybind setting
+                }
 
                 // Bottom Separator
                 ImGui.setCursorPosY(ImGui.getWindowSizeY() - 30);
@@ -253,6 +262,47 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             ImGui.popID();
             ImGui.dummy(0, 5);
         }
+    }
+
+    private boolean customToggleButton(String text, boolean toggled, float width, float height) {
+        float posX = (ImGui.getWindowWidth() - width) / 2;
+        ImGui.setCursorPosX(posX);
+
+        float screenPosX = ImGui.getCursorScreenPosX();
+        float screenPosY = ImGui.getCursorScreenPosY();
+
+        boolean hovered = ImGui.isMouseHoveringRect(screenPosX, screenPosY, screenPosX + width, screenPosY + height);
+        boolean clicked = hovered && ImGui.isMouseClicked(0);
+
+        float hoverAlpha = buttonHoverAlphas.getOrDefault(text, 0f);
+        if (hovered) {
+            hoverAlpha = Math.min(1.0f, hoverAlpha + ImGui.getIO().getDeltaTime() * animationSpeed);
+        } else {
+            hoverAlpha = Math.max(0.0f, hoverAlpha - ImGui.getIO().getDeltaTime() * animationSpeed);
+        }
+        buttonHoverAlphas.put(text, hoverAlpha);
+
+        int bgColor = ImGui.getColorU32(0.15f, 0.15f, 0.15f, 0.5f + (hoverAlpha * 0.3f));
+        int borderColor = ImGui.getColorU32(ImGuiCol.Border);
+
+        ImGui.getWindowDrawList().addRectFilled(screenPosX, screenPosY, screenPosX + width, screenPosY + height, bgColor, 4.0f);
+        ImGui.getWindowDrawList().addRect(screenPosX, screenPosY, screenPosX + width, screenPosY + height, borderColor, 4.0f);
+
+        int textColor;
+        if (toggled) {
+            textColor = ImGui.getColorU32(ACCENT_R, ACCENT_G, ACCENT_B, 1.0f);
+        } else {
+            textColor = ImGui.getColorU32(ImGuiCol.Text);
+        }
+
+        float textWidth = ImGui.calcTextSize(text).x;
+        float textX = screenPosX + (width - textWidth) / 2;
+        float textY = screenPosY + (height - ImGui.getTextLineHeight()) / 2;
+        ImGui.getWindowDrawList().addText(textX, textY, textColor, text);
+
+        ImGui.dummy(width, height);
+
+        return clicked;
     }
 
     private boolean customButton(String text, float width, float height, int textColor) {
