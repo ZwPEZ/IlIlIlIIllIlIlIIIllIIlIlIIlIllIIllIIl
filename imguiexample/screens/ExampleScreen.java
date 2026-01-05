@@ -4,14 +4,13 @@ import de.florianmichael.imguiexample.ExampleMod;
 import de.florianmichael.imguiexample.features.modules.Module;
 import de.florianmichael.imguiexample.features.modules.Section;
 import de.florianmichael.imguiexample.imgui.RenderInterface;
-import de.florianmichael.imguiexample.manager.ModuleManager;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiCol;
-import com.mojang.blaze3d.platform.InputConstants;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -434,13 +433,14 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (bindingModule != null) {
+            int keyCode = event.input();
             bindingModule.setBind(keyCode == GLFW.GLFW_KEY_ESCAPE ? -1 : keyCode);
             bindingModule = null;
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
