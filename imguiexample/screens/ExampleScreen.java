@@ -18,6 +18,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class ExampleScreen extends Screen implements RenderInterface {
     private static Module.Category selectedCategory;
@@ -246,7 +247,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
                 ImGui.dummy(0, 5);
 
-                String bindText = bindingModule == module ? "Press a key..." : "Keybind: " + (module.getBind() == -1 ? "None" : InputConstants.getKey(module.getBind(), -1).getDisplayName().getString());
+                String bindText = bindingModule == module ? "Press a key..." : "Keybind: " + (module.getBind() == -1 ? "None" : GLFW.glfwGetKeyName(module.getBind(), 0));
                 if (customButton(bindText, 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
                     bindingModule = module;
                 }
