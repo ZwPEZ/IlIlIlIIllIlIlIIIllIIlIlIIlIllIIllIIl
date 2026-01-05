@@ -8,10 +8,12 @@ import de.florianmichael.imguiexample.manager.ModuleManager;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiCol;
+import com.mojang.blaze3d.platform.InputConstants;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.Map;
 
 public final class ExampleScreen extends Screen implements RenderInterface {
     private static Module.Category selectedCategory;
+    private Module bindingModule = null;
 
     // Constants
     private static final float ACCENT_R = 255f / 255f;
@@ -139,7 +142,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         int borderColor = ImGui.getColorU32(ImGuiCol.Border);
         float rounding = 4.0f;
 
-        List<Module> modules = ExampleMod.moduleManager.getModulesByCategory(selectedCategory).stream().filter(m -> !m.isHidden()).collect(Collectors.toList());
+        List<Module> modules = ExampleMod.moduleManager.getModulesByCategory(selectedCategory);
 
         List<Module> leftModules = modules.stream().filter(m -> m.getSection() == Section.LEFT).collect(Collectors.toList());
         List<Module> middleModules = modules.stream().filter(m -> m.getSection() == Section.MIDDLE).collect(Collectors.toList());
@@ -218,7 +221,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             ImGui.setNextWindowPos(ImGui.getIO().getDisplaySizeX() / 2, ImGui.getIO().getDisplaySizeY() / 2, ImGuiCond.Always, 0.5f, 0.5f);
             ImGui.setNextWindowSize(300, 150, ImGuiCond.Once);
 
-            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar)) {
+            if (ImGui.beginPopupModal(module.getName() + " Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoScrollbar)) {
                 String title = module.getName() + " Settings";
                 float titleWidth = ImGui.calcTextSize(title).x;
                 ImGui.setCursorPosX((ImGui.getWindowSizeX() - titleWidth) / 2.0f);
@@ -243,9 +246,9 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
                 ImGui.dummy(0, 5);
 
-                String bindText = "Keybind: " + (module.getBind() == -1 ? "None" : "TODO");
+                String bindText = bindingModule == module ? "Press a key..." : "Keybind: " + (module.getBind() == -1 ? "None" : InputConstants.getKey(module.getBind(), -1).getDisplayName().getString());
                 if (customButton(bindText, 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
-                    // TODO: Implement keybind setting
+                    bindingModule = module;
                 }
 
                 // Bottom Separator
@@ -427,6 +430,16 @@ public final class ExampleScreen extends Screen implements RenderInterface {
 
             currentX += buttonWidth + buttonSpacing;
         }
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (bindingModule != null) {
+            bindingModule.setBind(keyCode == GLFW.GLFW_KEY_ESCAPE ? -1 : keyCode);
+            bindingModule = null;
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
