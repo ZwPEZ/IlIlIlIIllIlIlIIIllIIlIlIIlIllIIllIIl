@@ -10,7 +10,6 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -35,6 +34,7 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     private final float[] selectionFades = new float[Module.Category.values().length];
     private final Map<Module, Float> moduleSelectionFades = new HashMap<>();
     private final Map<String, Float> buttonHoverAlphas = new HashMap<>();
+    private final Map<String, Float> toggleAnimationFades = new HashMap<>();
     private final float animationSpeed = 15f;
 
     public ExampleScreen() {
@@ -204,7 +204,17 @@ public final class ExampleScreen extends Screen implements RenderInterface {
             float textB = b + (ACCENT_B - b) * moduleSelectionFades.get(module);
             int animatedTextColor = ImGui.getColorU32(textR, textG, textB, 1.0f);
 
-            if (customButton(module.getName(), width, buttonHeight, animatedTextColor)) {
+            int defaultBorderColor = ImGui.getColorU32(ImGuiCol.Border);
+            r = (defaultBorderColor >> 0 & 0xFF) / 255f;
+            g = (defaultBorderColor >> 8 & 0xFF) / 255f;
+            b = (defaultBorderColor >> 16 & 0xFF) / 255f;
+
+            float borderR = r + (ACCENT_R - r) * moduleSelectionFades.get(module);
+            float borderG = g + (ACCENT_G - g) * moduleSelectionFades.get(module);
+            float borderB = b + (ACCENT_B - b) * moduleSelectionFades.get(module);
+            int animatedBorderColor = ImGui.getColorU32(borderR, borderG, borderB, 1.0f);
+
+            if (customButton(module.getName(), width, buttonHeight, animatedTextColor, animatedBorderColor)) {
                 module.toggle();
             }
 
@@ -240,14 +250,14 @@ public final class ExampleScreen extends Screen implements RenderInterface {
                 ImGui.getWindowDrawList().addRectFilledMultiColor(modalPosX, glowTopY, modalPosX + modalWidth, separatorY, colorTop, colorTop, colorBottom, colorBottom);
 
                 ImGui.setCursorPosY(ImGui.getCursorPosY() + 10);
-                if (customToggleButton("Hidden", module.isHidden(), 100, 20)) {
+                if (customToggleSwitch("Hidden", module.isHidden(), 100, 20)) {
                     module.setHidden(!module.isHidden());
                 }
 
                 ImGui.dummy(0, 5);
 
                 String bindText = bindingModule == module ? "Press a key..." : "Keybind: " + (module.getBind() == -1 ? "None" : GLFW.glfwGetKeyName(module.getBind(), 0));
-                if (customButton(bindText, 100, 20, ImGui.getColorU32(ImGuiCol.Text))) {
+                if (customButton(bindText, 120, 20, ImGui.getColorU32(ImGuiCol.Text))) {
                     bindingModule = module;
                 }
 
@@ -309,6 +319,10 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     }
 
     private boolean customButton(String text, float width, float height, int textColor) {
+        return customButton(text, width, height, textColor, ImGui.getColorU32(ImGuiCol.Border));
+    }
+
+    private boolean customButton(String text, float width, float height, int textColor, int borderColor) {
         float posX = (ImGui.getWindowWidth() - width) / 2;
         ImGui.setCursorPosX(posX);
 
@@ -327,7 +341,6 @@ public final class ExampleScreen extends Screen implements RenderInterface {
         buttonHoverAlphas.put(text, hoverAlpha);
 
         int bgColor = ImGui.getColorU32(0.15f, 0.15f, 0.15f, 0.5f + (hoverAlpha * 0.3f));
-        int borderColor = ImGui.getColorU32(ImGuiCol.Border);
 
         ImGui.getWindowDrawList().addRectFilled(screenPosX, screenPosY, screenPosX + width, screenPosY + height, bgColor, 4.0f);
         ImGui.getWindowDrawList().addRect(screenPosX, screenPosY, screenPosX + width, screenPosY + height, borderColor, 4.0f);
@@ -433,14 +446,65 @@ public final class ExampleScreen extends Screen implements RenderInterface {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (bindingModule != null) {
-            int keyCode = event.input();
             bindingModule.setBind(keyCode == GLFW.GLFW_KEY_ESCAPE ? -1 : keyCode);
             bindingModule = null;
             return true;
         }
-        return super.keyPressed(event);
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private boolean customToggleSwitch(String text, boolean toggled, float width, float height) {
+        float switchWidth = height * 1.75f;
+        float textWidth = ImGui.calcTextSize(text).x;
+        float spacing = 5f;
+        float totalContentWidth = switchWidth + spacing + textWidth;
+
+        float containerWidth = ImGui.getWindowWidth();
+        ImGui.setCursorPosX((containerWidth - totalContentWidth) / 2.0f);
+
+        float screenPosX = ImGui.getCursorScreenPosX();
+        float screenPosY = ImGui.getCursorScreenPosY();
+
+        boolean hovered = ImGui.isMouseHoveringRect(screenPosX, screenPosY, screenPosX + totalContentWidth, screenPosY + height);
+        boolean clicked = hovered && ImGui.isMouseClicked(0);
+
+        float targetFade = toggled ? 1.0f : 0.0f;
+        float currentFade = toggleAnimationFades.getOrDefault(text, targetFade);
+        currentFade += (targetFade - currentFade) * ImGui.getIO().getDeltaTime() * animationSpeed;
+        toggleAnimationFades.put(text, currentFade);
+
+        float trackHeight = height * 0.6f;
+        float trackY = screenPosY + (height - trackHeight) / 2;
+        float trackRounding = trackHeight / 2.0f;
+
+        float bgR1 = 0.15f, bgG1 = 0.15f, bgB1 = 0.15f;
+        float bgR2 = ACCENT_R, bgG2 = ACCENT_G, bgB2 = ACCENT_B;
+
+        float trackR = bgR1 + (bgR2 - bgR1) * currentFade;
+        float trackG = bgG1 + (bgG2 - bgG1) * currentFade;
+        float trackB = bgB1 + (bgB2 - bgB1) * currentFade;
+        int trackColor = ImGui.getColorU32(trackR, trackG, trackB, 1.0f);
+
+        ImGui.getWindowDrawList().addRectFilled(screenPosX, trackY, screenPosX + switchWidth, trackY + trackHeight, trackColor, trackRounding);
+
+        float knobRadius = (height / 2.0f) * 0.8f;
+        float knobMinX = screenPosX + knobRadius + (height - knobRadius * 2) / 2;
+        float knobMaxX = screenPosX + switchWidth - knobRadius - (height - knobRadius * 2) / 2;
+        float knobX = knobMinX + (knobMaxX - knobMinX) * currentFade;
+        float knobY = screenPosY + height / 2.0f;
+
+        int knobColor = ImGui.getColorU32(0.9f, 0.9f, 0.9f, 1.0f);
+        ImGui.getWindowDrawList().addCircleFilled(knobX, knobY, knobRadius, knobColor, 16);
+
+        float textY = screenPosY + (height - ImGui.getTextLineHeight()) / 2.0f;
+        float textX = screenPosX + switchWidth + spacing;
+        ImGui.getWindowDrawList().addText(textX, textY, ImGui.getColorU32(ImGuiCol.Text), text);
+
+        ImGui.dummy(totalContentWidth, height);
+
+        return clicked;
     }
 
     @Override
