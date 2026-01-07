@@ -116,7 +116,13 @@ void Overlay::InitImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
+    io.IniFilename = nullptr;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowRounding = 5.0f;
+    style.FrameRounding = 3.0f;
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(35 / 255.0f, 35 / 255.0f, 35 / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_Border] = ImVec4(50 / 255.0f, 50 / 255.0f, 50 / 255.0f, 1.0f);
 
     ImGui_ImplWin32_Init(m_hwnd);
     ImGui_ImplDX11_Init(m_pd3dDevice, m_pd3dDeviceContext);
@@ -224,7 +230,7 @@ LRESULT WINAPI Overlay::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 void Overlay::RenderLoadingAnimation() {
-    const float animation_duration = 3.0f;
+    const float animation_duration = 1.5f;
     auto now = std::chrono::steady_clock::now();
     float time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start_time).count() / 1000.0f;
     float progress = std::min(time_elapsed / animation_duration, 1.0f);
@@ -232,27 +238,40 @@ void Overlay::RenderLoadingAnimation() {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 display_size = io.DisplaySize;
 
-    // Darkening overlay
-    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), display_size, IM_COL32(0, 0, 0, (int)(progress * 128)));
+    ImGui::SetNextWindowPos(ImVec2(display_size.x * 0.5f, display_size.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
 
-    // "Loading..." text
-    const char* text = "Loading...";
-    ImVec2 text_size = ImGui::CalcTextSize(text);
-    ImGui::GetBackgroundDrawList()->AddText(
-        ImVec2((display_size.x - text_size.x) / 2, (display_size.y - text_size.y) / 2 - 20),
-        IM_COL32(255, 255, 255, 255),
-        text
-    );
+    ImGui::Text("Loading...");
+    ImGui::Spacing();
 
-    // Progress bar
     float progress_bar_width = 200.0f;
     float progress_bar_height = 10.0f;
-    ImVec2 progress_bar_pos = ImVec2((display_size.x - progress_bar_width) / 2, (display_size.y + text_size.y) / 2);
-    ImGui::GetBackgroundDrawList()->AddRectFilled(
+    ImVec2 progress_bar_pos = ImGui::GetCursorScreenPos();
+    ImGui::InvisibleButton("##progress_bar", ImVec2(progress_bar_width, progress_bar_height));
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddRectFilled(
+        progress_bar_pos,
+        ImVec2(progress_bar_pos.x + progress_bar_width, progress_bar_pos.y + progress_bar_height),
+        IM_COL32(25, 25, 25, 255),
+        3.0f
+    );
+
+    draw_list->AddRectFilled(
         progress_bar_pos,
         ImVec2(progress_bar_pos.x + progress_bar_width * progress, progress_bar_pos.y + progress_bar_height),
-        IM_COL32(255, 255, 255, 255)
+        IM_COL32(255, 255, 255, 255),
+        3.0f
     );
+
+    draw_list->AddRect(
+        progress_bar_pos,
+        ImVec2(progress_bar_pos.x + progress_bar_width, progress_bar_pos.y + progress_bar_height),
+        IM_COL32(50, 50, 50, 255),
+        3.0f
+    );
+
+    ImGui::End();
 
     if (progress >= 1.0f) {
         m_state = State::Running;
