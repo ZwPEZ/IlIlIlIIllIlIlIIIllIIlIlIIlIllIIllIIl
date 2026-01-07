@@ -1,7 +1,20 @@
+#include <exception>
+#include <iostream>
+
 #include "overlay/overlay.h"
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    Overlay overlay;
-    overlay.Run();
-    return 0;
+int main()
+{
+    try
+    {
+        Overlay app{};
+        app.Run();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "[Overlay] " << e.what() << '\n';
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }

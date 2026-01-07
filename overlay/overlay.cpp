@@ -37,14 +37,23 @@ bool Overlay::CreateOverlayWindow() {
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, "Overlay", nullptr };
     RegisterClassEx(&wc);
 
-    RECT rect;
-    GetWindowRect(m_target_hwnd, &rect);
+    RECT client_rect;
+    GetClientRect(m_target_hwnd, &client_rect);
+
+    POINT top_left = { client_rect.left, client_rect.top };
+    ClientToScreen(m_target_hwnd, &top_left);
+
+    POINT bottom_right = { client_rect.right, client_rect.bottom };
+    ClientToScreen(m_target_hwnd, &bottom_right);
+
+    int width = bottom_right.x - top_left.x;
+    int height = bottom_right.y - top_left.y;
 
     m_hwnd = CreateWindowEx(
         WS_EX_TOPMOST,
         "Overlay", "Overlay",
         WS_POPUP,
-        rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+        top_left.x, top_left.y, width, height,
         nullptr, nullptr, wc.hInstance, this);
 
     if (!m_hwnd) return false;
@@ -128,9 +137,19 @@ void Overlay::Cleanup() {
 
 void Overlay::Render() {
     if (IsWindow(m_target_hwnd)) {
-        RECT rect;
-        GetWindowRect(m_target_hwnd, &rect);
-        SetWindowPos(m_hwnd, HWND_TOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 0);
+        RECT client_rect;
+        GetClientRect(m_target_hwnd, &client_rect);
+
+        POINT top_left = { client_rect.left, client_rect.top };
+        ClientToScreen(m_target_hwnd, &top_left);
+
+        POINT bottom_right = { client_rect.right, client_rect.bottom };
+        ClientToScreen(m_target_hwnd, &bottom_right);
+
+        int width = bottom_right.x - top_left.x;
+        int height = bottom_right.y - top_left.y;
+
+        SetWindowPos(m_hwnd, HWND_TOPMOST, top_left.x, top_left.y, width, height, SWP_NOACTIVATE);
     } else {
         PostQuitMessage(0);
     }
