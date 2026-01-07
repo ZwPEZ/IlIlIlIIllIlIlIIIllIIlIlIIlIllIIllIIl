@@ -150,8 +150,23 @@ void Overlay::Render() {
         int height = bottom_right.y - top_left.y;
 
         SetWindowPos(m_hwnd, HWND_TOPMOST, top_left.x, top_left.y, width, height, SWP_NOACTIVATE);
+
+        HWND foreground_hwnd = GetForegroundWindow();
+        if (foreground_hwnd == m_target_hwnd) {
+            ShowWindow(m_hwnd, SW_SHOW);
+        } else {
+            ShowWindow(m_hwnd, SW_HIDE);
+        }
+
     } else {
         PostQuitMessage(0);
+    }
+
+    HWND foreground_hwnd = GetForegroundWindow();
+    if (foreground_hwnd != m_target_hwnd) {
+        // To reduce CPU usage when the overlay is not visible
+        Sleep(100);
+        return;
     }
 
     ImGui_ImplDX11_NewFrame();
