@@ -230,19 +230,50 @@ LRESULT WINAPI Overlay::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 void Overlay::RenderLoadingAnimation() {
-    const float animation_duration = 1.5f;
+    const float bg_fade_in_duration = 0.5f;
+    const float gui_fade_in_duration = 0.5f;
+    const float progress_duration = 1.5f;
+    const float gui_fade_out_duration = 0.5f;
+
+    const float total_duration = bg_fade_in_duration + gui_fade_in_duration + progress_duration + gui_fade_out_duration;
+
     auto now = std::chrono::steady_clock::now();
     float time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start_time).count() / 1000.0f;
-    float progress = std::min(time_elapsed / animation_duration, 1.0f);
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 display_size = io.DisplaySize;
 
+    // Background fade-in
+    float bg_alpha = 0.0f;
+    if (time_elapsed < bg_fade_in_duration) {
+        bg_alpha = (time_elapsed / bg_fade_in_duration) * 128.0f;
+    } else {
+        bg_alpha = 128.0f;
+    }
+    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), display_size, IM_COL32(0, 0, 0, (int)bg_alpha));
+
+    float gui_alpha = 0.0f;
+    if (time_elapsed > bg_fade_in_duration && time_elapsed < bg_fade_in_duration + gui_fade_in_duration) {
+        gui_alpha = (time_elapsed - bg_fade_in_duration) / gui_fade_in_duration;
+    } else if (time_elapsed >= bg_fade_in_duration + gui_fade_in_duration && time_elapsed < total_duration - gui_fade_out_duration) {
+        gui_alpha = 1.0f;
+    } else if (time_elapsed >= total_duration - gui_fade_out_duration && time_elapsed < total_duration) {
+        gui_alpha = 1.0f - ((time_elapsed - (total_duration - gui_fade_out_duration)) / gui_fade_out_duration);
+    }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, gui_alpha);
     ImGui::SetNextWindowPos(ImVec2(display_size.x * 0.5f, display_size.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
 
     ImGui::Text("Loading...");
     ImGui::Spacing();
+
+    float progress = 0.0f;
+    if (time_elapsed > bg_fade_in_duration + gui_fade_in_duration && time_elapsed < bg_fade_in_duration + gui_fade_in_duration + progress_duration) {
+        progress = (time_elapsed - (bg_fade_in_duration + gui_fade_in_duration)) / progress_duration;
+    } else if (time_elapsed >= bg_fade_in_duration + gui_fade_in_duration + progress_duration) {
+        progress = 1.0f;
+    }
 
     float progress_bar_width = 200.0f;
     float progress_bar_height = 10.0f;
@@ -272,8 +303,9 @@ void Overlay::RenderLoadingAnimation() {
     );
 
     ImGui::End();
+    ImGui::PopStyleVar();
 
-    if (progress >= 1.0f) {
+    if (time_elapsed >= total_duration) {
         m_state = State::Running;
     }
 }
