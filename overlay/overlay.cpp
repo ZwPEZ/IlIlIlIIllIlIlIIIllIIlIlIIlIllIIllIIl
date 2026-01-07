@@ -7,7 +7,7 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 Overlay::Overlay() {
-    m_target_hwnd = FindWindow(nullptr, "Roblox");
+    m_target_hwnd = FindWindow(nullptr, L"Roblox");
 }
 
 Overlay::~Overlay() {
@@ -17,9 +17,13 @@ Overlay::~Overlay() {
 void Overlay::Run() {
     if (!m_target_hwnd) return;
 
+    SetForegroundWindow(m_target_hwnd);
+
     if (!CreateOverlayWindow()) return;
     if (!InitDX11()) return;
     InitImGui();
+
+    m_start_time = std::chrono::steady_clock::now();
 
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));
@@ -34,7 +38,7 @@ void Overlay::Run() {
 }
 
 bool Overlay::CreateOverlayWindow() {
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, "Overlay", nullptr };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"Overlay", nullptr };
     RegisterClassEx(&wc);
 
     RECT client_rect;
@@ -51,7 +55,7 @@ bool Overlay::CreateOverlayWindow() {
 
     m_hwnd = CreateWindowEx(
         WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
-        "Overlay", "Overlay",
+        L"Overlay", L"Overlay",
         WS_POPUP,
         top_left.x, top_left.y, width, height,
         nullptr, nullptr, wc.hInstance, this);
@@ -130,7 +134,7 @@ void Overlay::Cleanup() {
 
     if (m_hwnd) {
         DestroyWindow(m_hwnd);
-        UnregisterClass("Overlay", GetModuleHandle(nullptr));
+        UnregisterClass(L"Overlay", GetModuleHandle(nullptr));
         m_hwnd = nullptr;
     }
 }
@@ -173,7 +177,11 @@ void Overlay::Render() {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
+    if (m_state == State::Loading) {
+        RenderLoadingAnimation();
+    } else {
+        ImGui::ShowDemoWindow();
+    }
 
     ImGui::Render();
     const float clear_color_with_alpha[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -213,4 +221,40 @@ LRESULT WINAPI Overlay::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
         }
     }
     return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+void Overlay::RenderLoadingAnimation() {
+    const float animation_duration = 3.0f;
+    auto now = std::chrono::steady_clock::now();
+    float time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start_time).count() / 1000.0f;
+    float progress = std::min(time_elapsed / animation_duration, 1.0f);
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 display_size = io.DisplaySize;
+
+    // Darkening overlay
+    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), display_size, IM_COL32(0, 0, 0, (int)(progress * 128)));
+
+    // "Loading..." text
+    const char* text = "Loading...";
+    ImVec2 text_size = ImGui::CalcTextSize(text);
+    ImGui::GetBackgroundDrawList()->AddText(
+        ImVec2((display_size.x - text_size.x) / 2, (display_size.y - text_size.y) / 2 - 20),
+        IM_COL32(255, 255, 255, 255),
+        text
+    );
+
+    // Progress bar
+    float progress_bar_width = 200.0f;
+    float progress_bar_height = 10.0f;
+    ImVec2 progress_bar_pos = ImVec2((display_size.x - progress_bar_width) / 2, (display_size.y + text_size.y) / 2);
+    ImGui::GetBackgroundDrawList()->AddRectFilled(
+        progress_bar_pos,
+        ImVec2(progress_bar_pos.x + progress_bar_width * progress, progress_bar_pos.y + progress_bar_height),
+        IM_COL32(255, 255, 255, 255)
+    );
+
+    if (progress >= 1.0f) {
+        m_state = State::Running;
+    }
 }
