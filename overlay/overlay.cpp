@@ -50,7 +50,7 @@ bool Overlay::CreateOverlayWindow() {
     int height = bottom_right.y - top_left.y;
 
     m_hwnd = CreateWindowEx(
-        WS_EX_TOPMOST,
+        WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
         "Overlay", "Overlay",
         WS_POPUP,
         top_left.x, top_left.y, width, height,
@@ -152,7 +152,7 @@ void Overlay::Render() {
         SetWindowPos(m_hwnd, HWND_TOPMOST, top_left.x, top_left.y, width, height, SWP_NOACTIVATE);
 
         HWND foreground_hwnd = GetForegroundWindow();
-        if (foreground_hwnd == m_target_hwnd) {
+        if (foreground_hwnd == m_target_hwnd || foreground_hwnd == m_hwnd) {
             ShowWindow(m_hwnd, SW_SHOW);
         } else {
             ShowWindow(m_hwnd, SW_HIDE);
@@ -163,7 +163,7 @@ void Overlay::Render() {
     }
 
     HWND foreground_hwnd = GetForegroundWindow();
-    if (foreground_hwnd != m_target_hwnd) {
+    if (foreground_hwnd != m_target_hwnd && foreground_hwnd != m_hwnd) {
         // To reduce CPU usage when the overlay is not visible
         Sleep(100);
         return;
