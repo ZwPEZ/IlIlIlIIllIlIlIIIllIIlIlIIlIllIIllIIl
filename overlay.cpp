@@ -51,19 +51,9 @@ void Overlay::RenderLoadingAnimation() {
 
     // --- Font & Text Setup ---
     const char* text = "Flawless";
-    ImFont* font = io.Fonts->Fonts[0]; // Use the default font
-    const float desired_font_size = display_size.y / 8.0f; // Make it responsive
-    const float font_scale = desired_font_size / font->FontSize;
-
-    ImGui::PushFont(font);
-    font->Scale = font_scale;
-    ImGui::PushFont(nullptr); // Apply scale change
-
+    // NOTE: Removed dynamic font scaling to fix a compilation error.
+    // The text will now render at the default size provided by the font.
     ImVec2 text_size = ImGui::CalcTextSize(text);
-
-    ImGui::PopFont();
-    font->Scale = 1.0f; // Reset scale for next frame
-    ImGui::PopFont();
 
     // --- Positioning ---
     const float initial_y_offset = text_size.y / 2.0f;
@@ -79,21 +69,13 @@ void Overlay::RenderLoadingAnimation() {
 
     ImU32 color_top = IM_COL32(200, 200, 200, (int)(255 * alpha));
     ImU32 color_bottom = IM_COL32(120, 120, 120, (int)(255 * alpha));
-    const float shadow_offset = std::max(1.0f, desired_font_size / 50.0f);
-
-    ImGui::PushFont(font);
-    font->Scale = font_scale;
-    ImGui::PushFont(nullptr); // Apply scale change
+    const float shadow_offset = 1.0f;
 
     // Render bottom/shadow text
     draw_list->AddText(ImVec2(final_text_pos.x, final_text_pos.y + shadow_offset), color_bottom, text);
 
     // Render top/main text
     draw_list->AddText(final_text_pos, color_top, text);
-
-    ImGui::PopFont();
-    font->Scale = 1.0f; // Reset scale
-    ImGui::PopFont();
 
     // --- State Transition ---
     if (time_elapsed >= total_duration) {
