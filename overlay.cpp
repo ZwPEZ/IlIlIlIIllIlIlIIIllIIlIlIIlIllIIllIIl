@@ -258,14 +258,20 @@ void Overlay::Render() {
         if (GetAsyncKeyState(VK_INSERT) & 1)
             NoSave::menuOpened = !NoSave::menuOpened;
 
-        LONG_PTR style = GetWindowLongPtr(m_hwnd, GWL_EXSTYLE);
-        if (NoSave::menuOpened) {
-            style &= ~WS_EX_TRANSPARENT;
+        static bool last_menu_state = !NoSave::menuOpened; // Force update on first frame
+        if (last_menu_state != NoSave::menuOpened) {
+            LONG_PTR style = GetWindowLongPtr(m_hwnd, GWL_EXSTYLE);
+            if (NoSave::menuOpened) {
+                style &= ~WS_EX_TRANSPARENT;
+            } else {
+                style |= WS_EX_TRANSPARENT;
+            }
+            SetWindowLongPtr(m_hwnd, GWL_EXSTYLE, style);
+
+            // Force the change to take effect for hit-testing
+            SetWindowPos(m_hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            last_menu_state = NoSave::menuOpened;
         }
-        else {
-            style |= WS_EX_TRANSPARENT;
-        }
-        SetWindowLongPtr(m_hwnd, GWL_EXSTYLE, style);
 
         if (NoSave::debugMode) {
             ImGui::ShowDemoWindow();
