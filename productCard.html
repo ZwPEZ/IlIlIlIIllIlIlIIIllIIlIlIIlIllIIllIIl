@@ -1,0 +1,91 @@
+<style>
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, var(--accent-color) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 0;
+  }
+
+  .product-card:hover::before {
+    opacity: 0.2;
+  }
+</style>
+<div style="--accent-color: #9269FF;"
+  class="product-card group relative w-full max-w-sm overflow-hidden rounded-2xl border border-[#1f1f1f] bg-[#121212] p-4 shadow-lg transition-all duration-300 hover:scale-105 hover:border-white/20">
+  <a href="/product/{{product.url}}" class="absolute inset-0 z-10" aria-label="View Product"></a>
+
+  <div class="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
+    {% assign checkArray = product.image | split: 'yt:' %}
+    {% if checkArray[1] %}
+    <iframe class="h-full w-full object-cover" src="https://www.youtube.com/embed/{{ checkArray[1] }}"
+      title="YouTube video player" frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>
+    {% else %}
+    <img
+        src="{{product.image | default: '/images/no_image_placeholder.png'}}"
+        alt="{{product.name}}"
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+    {% endif %}
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+    <div class="absolute bottom-2 right-2">
+      {% if product.stockVisible and product.isNotResellerProduct and product.isEveryVariantWebhook == false %}
+      {% if product.stockCount > 99 and product.capStock %}
+      <span class="rounded-full bg-green-500/20 px-2 py-1 text-xs font-semibold text-green-400">99+ in Stock</span>
+      {% elsif product.stockCount > 999999999999 %}
+      <span class="rounded-full bg-green-500/20 px-2 py-1 text-xs font-semibold text-green-400">∞ Stock</span>
+      {% elsif product.stockCount > 0 %}
+      <span class="rounded-full bg-green-500/20 px-2 py-1 text-xs font-semibold text-green-400">{{ product.stockCount }} in Stock</span>
+      {% else %}
+      <span class="rounded-full bg-red-500/20 px-2 py-1 text-xs font-semibold text-red-400">Out of Stock</span>
+      {% endif %}
+      {% elsif product.stockCount == 0 and product.isEveryVariantWebhook == false %}
+      <span class="rounded-full bg-red-500/20 px-2 py-1 text-xs font-semibold text-red-400">Out of Stock</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <h3 class="text-lg font-bold text-white">{{ product.name }}</h3>
+    {% if product.payWhatYouWantEnabled == true %}
+    <span class="text-xs font-bold text-[--accent-color]">Pay What You Want</span>
+    {% endif %}
+  </div>
+
+  <div class="mt-4 flex items-end justify-between">
+    <div class="flex flex-col">
+      <span class="text-xs text-white/60">Starting at</span>
+      {% if product.priceSlash != 0 %}
+      <div class="flex items-baseline gap-2">
+        <span class="text-2xl font-bold text-[--accent-color]">
+            <price data-currency="{{product.baseCurrency}}" data-price="{{product.price}}"></price>
+          </span>
+        <span class="text-sm text-white/50 line-through">
+            <price data-currency="{{product.baseCurrency}}" data-price="{{product.priceSlash}}"></price>
+          </span>
+      </div>
+      {% else %}
+      <span class="text-2xl font-bold text-[--accent-color]">
+          <price data-currency="{{product.baseCurrency}}" data-price="{{product.price}}"></price>
+        </span>
+      {% endif %}
+    </div>
+    <a href="/product/{{product.url}}"
+      class="z-20 relative inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#9269FF] to-[#7A53CC] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:opacity-90 hover:shadow-[0_0_20px_#9269FF60] transform hover:scale-105">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        class="lucide lucide-shopping-cart">
+        <circle cx="8" cy="21" r="1"></circle>
+        <circle cx="19" cy="21" r="1"></circle>
+        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+      </svg>
+      <span>Purchase</span>
+    </a>
+  </div>
+</div>

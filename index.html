@@ -1,0 +1,191 @@
+<div class="dark bg-background text-white relative !scroll-smooth font-geist">
+  <!-- HeaderBar -->
+  <div id="headerBar" class="mx-auto w-full sticky top-0 z-50 backdrop-blur-md bg-white/[0.05]">
+    <nav class="mx-auto max-w-[1120px] flex flex-row justify-between items-center px-4 py-4">
+      <a href="/">
+        <div class="flex flex-row items-center gap-2 w-fit md:min-w-[203px]">
+          <fade-in-image alt="website logo" src="{{ image }}"
+            class="h-8 w-8 rounded-full object-contain"></fade-in-image>
+          <span class="text-xl font-bold hidden sm:inline-block">
+            {{ name }}
+          </span>
+        </div>
+      </a>
+      <div class="hidden flex-row items-center gap-1 md:flex">
+        <link-button href="/tos" class="text-xs hover:text-[--accent-color]" data-id="000001" data-label="Terms"
+          data-variant="ghost" data-href="">Terms</link-button>
+
+        <link-button href="/reviews" class="text-xs hover:text-[--accent-color]" data-id="000002" data-label="Reviews"
+          data-variant="ghost" data-href="">Reviews</link-button>
+      </div>
+      <div class="flex flex-row items-center gap-4">
+        <currency-selector class="bg-white/10 hover:bg-white/25 border-transparent"></currency-selector>
+        <a href="/payment"
+          class="flex duration-500 justify-center items-center gap-3 rounded-md text-xl px-3 py-2.5 bg-white/10 hover:bg-white/25 relative">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-shopping-cart">
+            <circle cx="8" cy="21" r="1" />
+            <circle cx="19" cy="21" r="1" />
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+          </svg>
+          <span id="cart-count"
+            class="h-4 w-4 bg-[--accent-color] text-xs rounded-full aspect-square absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 flex items-center justify-center text-white leading-none">
+            {{ cartItems.items.length | plus: cartItems.bundles.length }}
+          </span>
+        </a>
+
+        <link-button href="/order"
+          class="hidden md:flex text-xs space-x-2 bg-[--accent-color] hover:bg-[--dark-accent-color]" data-id="000003"
+          data-label="Customer Login" data-variant="default" data-href="">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>Customer Login</span>
+        </link-button>
+
+        <header-bar-sidebar-btn
+          class="md:hidden inline-block px-2.5 py-2.5 hover:bg-white/10 rounded-md"></header-bar-sidebar-btn>
+      </div>
+    </nav>
+  </div>
+  <!-- Social Icons -->
+  {% assign arr = socials %}
+  <div class="flex flex-col gap-2 fixed bottom-2 right-2 z-20">
+    {%- for social in arr %}
+    <a href="{{ social.url }}" aria-label="{{ social.name }}" class="text-white">
+      <div class="flex items-center justify-center group">
+        {% if social.name == 'discord' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#6571ff]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 32 32"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M20.992 20.163a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008a2.86 2.86 0 0 1-2.688 3.022h-.008zm-9.966 0a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008q.005.074.005.161a2.867 2.867 0 0 1-2.692 2.862zM26.393 6.465c-1.763-.832-3.811-1.49-5.955-1.871l-.149-.022-.017-.002a.09.09 0 0 0-.081.047c-.234.411-.488.924-.717 1.45l-.043.111a23 23 0 0 0-6.985.016l.129-.017c-.27-.63-.528-1.142-.813-1.638l.041.077a.1.1 0 0 0-.083-.047l-.016.001h.001a24.6 24.6 0 0 0-6.256 1.957l.151-.064a.1.1 0 0 0-.04.034C2.706 10.538.998 15.566.998 20.993q0 1.36.141 2.684l-.009-.11a.1.1 0 0 0 .039.07 24.6 24.6 0 0 0 7.313 3.738l.176.048a.1.1 0 0 0 .028.004q.05-.002.077-.038a17.5 17.5 0 0 0 1.485-2.392l.047-.1a.096.096 0 0 0-.052-.132h-.001a16 16 0 0 1-2.417-1.157l.077.042a.1.1 0 0 1-.048-.083c0-.031.015-.059.038-.076.157-.118.315-.24.465-.364a.1.1 0 0 1 .097-.013h-.001c2.208 1.061 4.8 1.681 7.536 1.681s5.329-.62 7.643-1.727l-.107.046a.1.1 0 0 1 .099.012q.226.188.466.365a.1.1 0 0 1 .038.077.1.1 0 0 1-.046.082c-.661.395-1.432.769-2.235 1.078l-.105.036a.1.1 0 0 0-.062.089q0 .024.011.044v-.001c.501.96 1.009 1.775 1.571 2.548l-.04-.057a.1.1 0 0 0 .106.036h-.001c2.865-.892 5.358-2.182 7.566-3.832l-.065.047a.1.1 0 0 0 .039-.069c.087-.784.136-1.694.136-2.615 0-5.415-1.712-10.43-4.623-14.534l.052.078a.1.1 0 0 0-.038-.036z" />
+          </svg>
+        </div>
+        {% elsif social.name == 'telegram' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#2ba4df]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 48 48"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M41.42 7.309s3.885-1.515 3.56 2.164c-.107 1.515-1.078 6.818-1.834 12.553l-2.59 16.99s-.216 2.489-2.159 2.922c-1.942.432-4.856-1.515-5.396-1.948-.432-.325-8.094-5.195-10.792-7.575-.756-.65-1.62-1.948.108-3.463L33.649 18.13c1.295-1.3 2.59-4.33-2.806-.65l-15.11 10.28s-1.727 1.083-4.964.109l-7.016-2.165s-2.59-1.623 1.835-3.246c10.793-5.086 24.068-10.28 35.831-15.15" />
+          </svg>
+        </div>
+        {% elsif social.name == 'tiktok' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#fe2f5d]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 24 24"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M21 7v2a1 1 0 0 1-1 1 8 8 0 0 1-4-1.08v6.58a6.5 6.5 0 1 1-9.47-5.78 1 1 0 0 1 1.47.9v2.52a.92.92 0 0 1-.28.62 2.49 2.49 0 0 0 2 4.23A2.61 2.61 0 0 0 12 15.35V3a1 1 0 0 1 1-1h2.11a1 1 0 0 1 1 .83A4 4 0 0 0 20 6a1 1 0 0 1 1 1" />
+          </svg>
+        </div>
+        {% elsif social.name == 'youtube' %}
+        <div class="rounded-full flex items-center justify-center w-12 h-12 bg-[#fe0808]">
+          <svg class="group-hover:scale-[1.4] duration-300" width="20" height="20" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path
+              d="M23 9.71a8.5 8.5 0 0 0-.91-4.13 2.92 2.92 0 0 0-1.72-1A78 78 0 0 0 12 4.27a79 79 0 0 0-8.34.3 2.87 2.87 0 0 0-1.46.74c-.9.83-1 2.25-1.1 3.45a48 48 0 0 0 0 6.48 9.6 9.6 0 0 0 .3 2 3.14 3.14 0 0 0 .71 1.36 2.86 2.86 0 0 0 1.49.78 45 45 0 0 0 6.5.33c3.5.05 6.57 0 10.2-.28a2.9 2.9 0 0 0 1.53-.78 2.5 2.5 0 0 0 .61-1 10.6 10.6 0 0 0 .52-3.4c.04-.56.04-3.94.04-4.54M9.74 14.85V8.66l5.92 3.11c-1.66.92-3.85 1.96-5.92 3.08" />
+          </svg>
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {%- endfor %}
+  </div>
+  <!-- LiquidJs Childrens -->
+  {% block content %}
+  {% endblock %}
+  <!-- React Component Childrens -->
+  <outlet></outlet>
+  <!-- Footer -->
+  <div class="w-full mx-auto max-w-[1400px]">
+    <div class="py-4 sm:pt-16 lg:pt-24 w-full px-4">
+      <div class="mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
+          <div class="md:col-span-2 lg:col-span-1">
+            <div class="flex flex-row items-center gap-2 w-fit">
+              <fade-in-image alt="website logo" src="{{ image }}"
+                class="h-8 w-8 rounded-full object-contain"></fade-in-image>
+              <span class="text-xl font-bold">
+                {{ name }}
+              </span>
+            </div>
+            <p class="text-sm leading-relaxed text-muted-foreground/70 mt-4 max-w-lg">{{ description }}</p>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm font-semibold tracking-widest text-[--accent-color] uppercase">Connect With Us</p>
+            <ul class="mt-4 space-y-2">
+              {% assign arr = socials %}
+              {%- for social in arr %}
+              <li>
+                <a href="{{ social.url }}" title="{{ social.name }}"
+                  class="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">
+                  <div class="w-5 h-5 flex items-center justify-center">
+                  {% if social.name == 'discord' %}
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.992 20.163a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008a2.86 2.86 0 0 1-2.688 3.022h-.008zm-9.966 0a2.884 2.884 0 0 1-2.695-3.03v.007a2.867 2.867 0 0 1 2.687-3.023h.008a2.85 2.85 0 0 1 2.695 3.031v-.008q.005.074.005.161a2.867 2.867 0 0 1-2.692 2.862zM26.393 6.465c-1.763-.832-3.811-1.49-5.955-1.871l-.149-.022-.017-.002a.09.09 0 0 0-.081.047c-.234.411-.488.924-.717 1.45l-.043.111a23 23 0 0 0-6.985.016l.129-.017c-.27-.63-.528-1.142-.813-1.638l.041.077a.1.1 0 0 0-.083-.047l-.016.001h.001a24.6 24.6 0 0 0-6.256 1.957l.151-.064a.1.1 0 0 0-.04.034C2.706 10.538.998 15.566.998 20.993q0 1.36.141 2.684l-.009-.11a.1.1 0 0 0 .039.07 24.6 24.6 0 0 0 7.313 3.738l.176.048a.1.1 0 0 0 .028.004q.05-.002.077-.038a17.5 17.5 0 0 0 1.485-2.392l.047-.1a.096.096 0 0 0-.052-.132h-.001a16 16 0 0 1-2.417-1.157l.077.042a.1.1 0 0 1-.048-.083c0-.031.015-.059.038-.076.157-.118.315-.24.465-.364a.1.1 0 0 1 .097-.013h-.001c2.208 1.061 4.8 1.681 7.536 1.681s5.329-.62 7.643-1.727l-.107.046a.1.1 0 0 1 .099.012q.226.188.466.365a.1.1 0 0 1 .038.077.1.1 0 0 1-.046.082c-.661.395-1.432.769-2.235 1.078l-.105.036a.1.1 0 0 0-.062.089q0 .024.011.044v-.001c.501.96 1.009 1.775 1.571 2.548l-.04-.057a.1.1 0 0 0 .106.036h-.001c2.865-.892 5.358-2.182 7.566-3.832l-.065.047a.1.1 0 0 0 .039-.069c.087-.784.136-1.694.136-2.615 0-5.415-1.712-10.43-4.623-14.534l.052.078a.1.1 0 0 0-.038-.036z"></path></svg>
+                  {% elsif social.name == 'telegram' %}
+                    <svg width="14" height="14" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M41.42 7.309s3.885-1.515 3.56 2.164c-.107 1.515-1.078 6.818-1.834 12.553l-2.59 16.99s-.216 2.489-2.159 2.922c-1.942.432-4.856-1.515-5.396-1.948-.432-.325-8.094-5.195-10.792-7.575-.756-.65-1.62-1.948.108-3.463L33.649 18.13c1.295-1.3 2.59-4.33-2.806-.65l-15.11 10.28s-1.727 1.083-4.964.109l-7.016-2.165s-2.59-1.623 1.835-3.246c10.793-5.086 24.068-10.28 35.831-15.15"></path></svg>
+                  {% elsif social.name == 'tiktok' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21 7v2a1 1 0 0 1-1 1 8 8 0 0 1-4-1.08v6.58a6.5 6.5 0 1 1-9.47-5.78 1 1 0 0 1 1.47.9v2.52a.92.92 0 0 1-.28.62 2.49 2.49 0 0 0 2 4.23A2.61 2.61 0 0 0 12 15.35V3a1 1 0 0 1 1-1h2.11a1 1 0 0 1 1 .83A4 4 0 0 0 20 6a1 1 0 0 1 1 1"></path></svg>
+                  {% elsif social.name == 'youtube' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M23 9.71a8.5 8.5 0 0 0-.91-4.13 2.92 2.92 0 0 0-1.72-1A78 78 0 0 0 12 4.27a79 79 0 0 0-8.34.3 2.87 2.87 0 0 0-1.46.74c-.9.83-1 2.25-1.1 3.45a48 48 0 0 0 0 6.48 9.6 9.6 0 0 0 .3 2 3.14 3.14 0 0 0 .71 1.36 2.86 2.86 0 0 0 1.49.78 45 45 0 0 0 6.5.33c3.5.05 6.57 0 10.2-.28a2.9 2.9 0 0 0 1.53-.78 2.5 2.5 0 0 0 .61-1 10.6 10.6 0 0 0 .52-3.4c.04-.56.04-3.94.04-4.54M9.74 14.85V8.66l5.92 3.11c-1.66.92-3.85 1.96-5.92 3.08"></path></svg>
+                  {% endif %}
+                  </div>
+                  <span>{{ social.name | capitalize }}</span>
+                </a>
+              </li>
+              {%- endfor %}
+            </ul>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm font-semibold tracking-widest text-[--accent-color] uppercase">LEGAL</p>
+            <ul class="mt-4 space-y-2">
+              <li>
+                <a href="/tos" title="Terms & Conditions" class="flex items-center justify-center md:justify-start text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">Terms & Conditions</a>
+              </li>
+              <li>
+                <a href="/tos" title="Refund Policy" class="flex items-center justify-center md:justify-start text-sm text-muted-foreground/70 transition-all duration-200 hover:text-[--accent-color] focus:text-[--accent-color]">Refund Policy</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-12 border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between">
+          <p class="text-sm text-center text-white/70">
+            © <span id="copyright-year"></span> NightMarket.cc. All Rights Reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script id="header-script">
+    // Select the navbar
+    const navbar = document.getElementById('headerBar');
+
+    // Function to check scroll position and update navbar background
+    function updateNavbarBackground() {
+      if (window.scrollY === 0) {
+        // At the top: make background transparent
+        navbar.classList.remove('backdrop-blur-md', 'bg-white/[0.05]');
+        navbar.classList.add('bg-transparent');
+      } else {
+        // Scrolled down: restore original background
+        navbar.classList.remove('bg-transparent');
+        navbar.classList.add('backdrop-blur-md', 'bg-white/[0.05]');
+      }
+    }
+
+    // Listen for scroll events
+    window.addEventListener('scroll', updateNavbarBackground);
+
+    // Call once on load to set the correct initial state
+    updateNavbarBackground();
+  </script>
+</div>
+<script key="layout-script">{% raw %}"use strict";(()=>{function setLayoutCartCount(cartCount){let cartCountSpan=document.getElementById("cart-count");cartCountSpan&&(cartCountSpan.innerText=cartCount.toString())}async function entrypoint(){setLayoutCartCount(localCart.bundles.length+localCart.items.length)}entrypoint(/*!{% endraw %}*/decodeURIComponent(``)/*!{% raw %}*/);
+})();{% endraw %}</script>
+<script>
+  document.getElementById('copyright-year').textContent = new Date().getFullYear();
+</script>
