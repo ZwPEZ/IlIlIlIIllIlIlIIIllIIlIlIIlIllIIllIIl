@@ -15,13 +15,11 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     static float indicator_pos_x = 0.0f;
     static float indicator_width = 0.0f;
 
-    const float tab_height = 40.0f;
     const float tab_spacing = 40.0f;
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 win_pos = ImGui::GetWindowPos();
     ImVec2 win_size = ImGui::GetWindowSize();
-    const float footer_height = 55.0f;
 
     float total_tabs_width = 0.0f;
     for (const auto& tab : tabs) {
@@ -31,10 +29,8 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     }
     total_tabs_width += (tabs.size() - 1) * tab_spacing;
 
-    float start_x = win_pos.x + (win_size.x - total_tabs_width) * 0.5f;
-    float cursor_y = win_pos.y + win_size.y - footer_height + 5.0f;
-
-    ImGui::SetCursorScreenPos(ImVec2(start_x, cursor_y));
+    // Center the tabs horizontally
+    ImGui::SetCursorPosX((win_size.x - total_tabs_width) * 0.5f);
 
     float target_indicator_pos_x = indicator_pos_x;
     float target_indicator_width = indicator_width;
@@ -47,6 +43,8 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
             ImGui::SameLine(0, tab_spacing);
         }
 
+        ImVec2 tab_start_pos = ImGui::GetCursorPos();
+
         float icon_width = ImGui::CalcTextSize(tab.icon).x;
         float name_width = ImGui::CalcTextSize(tab.name).x;
         float tab_width = (std::max)(icon_width, name_width);
@@ -56,17 +54,16 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
         ImGui::PushStyleColor(ImGuiCol_Text, is_selected ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
 
         ImGui::PushFont(icon_font);
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (tab_width - icon_width) * 0.5f);
+        ImGui::SetCursorPosX(tab_start_pos.x + (tab_width - icon_width) * 0.5f);
         ImGui::Text("%s", tab.icon);
         ImGui::PopFont();
 
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (tab_width - name_width) * 0.5f);
+        ImGui::SetCursorPosX(tab_start_pos.x + (tab_width - name_width) * 0.5f);
         ImGui::Text("%s", tab.name);
         ImGui::PopStyleColor();
 
-        ImVec2 tab_min = ImGui::GetItemRectMin();
-        ImGui::SetCursorScreenPos(ImVec2(tab_min.x, cursor_y));
-        if (ImGui::InvisibleButton("##tab", ImVec2(tab_width, tab_height))) {
+        ImGui::SetCursorPos(tab_start_pos);
+        if (ImGui::InvisibleButton("##tab", ImVec2(tab_width, TAB_HEIGHT))) {
             selected_tab = i;
         }
 
@@ -82,11 +79,12 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     }
 
     if (indicator_width == 0.0f) {
+        float start_x_screen = win_pos.x + (win_size.x - total_tabs_width) * 0.5f;
         float initial_tab_offset = 0.0f;
         for (int i = 0; i < selected_tab; ++i) {
             initial_tab_offset += (std::max)(ImGui::CalcTextSize(tabs[i].icon).x, ImGui::CalcTextSize(tabs[i].name).x) + tab_spacing;
         }
-        indicator_pos_x = start_x + initial_tab_offset;
+        indicator_pos_x = start_x_screen + initial_tab_offset;
         indicator_width = (std::max)(ImGui::CalcTextSize(tabs[selected_tab].icon).x, ImGui::CalcTextSize(tabs[selected_tab].name).x);
         target_indicator_pos_x = indicator_pos_x;
         target_indicator_width = indicator_width;
