@@ -143,8 +143,6 @@ bool Overlay::InitDX11() {
     if (D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &scd, &m_pSwapChain, &m_pd3dDevice, &featureLevel, &m_pd3dDeviceContext) != S_OK)
         return false;
 
-    g_pd3dDevice = m_pd3dDevice;
-
     CreateRenderTarget();
     return true;
 }
@@ -207,14 +205,16 @@ void Overlay::InitImGui()
     m_poppins_bold = io.Fonts->AddFontFromMemoryTTF(poppins_bold, sizeof(poppins_bold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     m_poppins_extrabold = io.Fonts->AddFontFromMemoryTTF(poppins_extrabold, sizeof(poppins_extrabold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
 
-    Custom::LoadTextureFromMemory(m_pd3dDevice, eye_icon, 32, 32, &m_eye_icon_texture);
-    Custom::LoadTextureFromMemory(m_pd3dDevice, cog_icon, 32, 32, &m_cog_icon_texture);
-    Custom::LoadTextureFromMemory(m_pd3dDevice, user_icon, 32, 32, &m_user_icon_texture);
+    bool eye_loaded = Custom::LoadTextureFromMemory(m_pd3dDevice, eye_icon, sizeof(eye_icon), &m_eye_icon_texture);
+    bool cog_loaded = Custom::LoadTextureFromMemory(m_pd3dDevice, cog_icon, sizeof(cog_icon), &m_cog_icon_texture);
+    bool user_loaded = Custom::LoadTextureFromMemory(m_pd3dDevice, user_icon, sizeof(user_icon), &m_user_icon_texture);
+
+    if (!eye_loaded || !cog_loaded || !user_loaded) {
+        // Handle error, maybe log it or show a message
+    }
 }
 
 void Overlay::Cleanup() {
-    Custom::Shutdown();
-
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -225,7 +225,7 @@ void Overlay::Cleanup() {
 
     if (m_pSwapChain) { m_pSwapChain->Release(); m_pSwapChain = nullptr; }
     if (m_pd3dDeviceContext) { m_pd3dDeviceContext->Release(); m_pd3dDeviceContext = nullptr; }
-    if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; g_pd3dDevice = nullptr; }
+    if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
     if (m_mainRenderTargetView) { m_mainRenderTargetView->Release(); m_mainRenderTargetView = nullptr; }
 
     if (m_hwnd) {

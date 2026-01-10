@@ -2,15 +2,20 @@
 #include "../Settings/settings.h"
 #include "imgui/imgui_internal.h"
 
-void Custom::Shutdown() {
-    // No longer needed
-}
+#define STB_IMAGE_IMPLEMENTATION
+#include "overlay/stb/stb_image.h"
 
-bool Custom::LoadTextureFromMemory(ID3D11Device* device, const unsigned char* data, int width, int height, ID3D11ShaderResourceView** out_srv) {
+bool Custom::LoadTextureFromMemory(ID3D11Device* device, const unsigned char* data, unsigned int size, ID3D11ShaderResourceView** out_srv) {
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load_from_memory(data, size, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
     D3D11_TEXTURE2D_DESC desc;
     ZeroMemory(&desc, sizeof(desc));
-    desc.Width = width;
-    desc.Height = height;
+    desc.Width = image_width;
+    desc.Height = image_height;
     desc.MipLevels = 1;
     desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -21,12 +26,14 @@ bool Custom::LoadTextureFromMemory(ID3D11Device* device, const unsigned char* da
 
     ID3D11Texture2D* pTexture = NULL;
     D3D11_SUBRESOURCE_DATA subResource;
-    subResource.pSysMem = data;
+    subResource.pSysMem = image_data;
     subResource.SysMemPitch = desc.Width * 4;
     subResource.SysMemSlicePitch = 0;
     HRESULT hr = device->CreateTexture2D(&desc, &subResource, &pTexture);
-    if (FAILED(hr))
+    if (FAILED(hr)) {
+        stbi_image_free(image_data);
         return false;
+    }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     ZeroMemory(&srvDesc, sizeof(srvDesc));
@@ -36,6 +43,8 @@ bool Custom::LoadTextureFromMemory(ID3D11Device* device, const unsigned char* da
     srvDesc.Texture2D.MostDetailedMip = 0;
     hr = device->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
     pTexture->Release();
+
+    stbi_image_free(image_data);
 
     return !FAILED(hr);
 }
@@ -76,7 +85,10 @@ void Custom::RenderTabs(int* selected_tab, const float footerHeight, ID3D11Shade
         bool is_selected = (*selected_tab == i);
         ImVec4 tint_color = is_selected ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
-        if (ImGui::ImageButton((void*)icons[i], ImVec2(32, 32), ImVec2(0,0), ImVec2(1,1), -1, ImVec4(0,0,0,0), tint_color)) {
+        char button_id[32];
+        sprintf(button_id, "tab_icon_%d", i);
+
+        if (ImGui::ImageButton(button_id, (void*)icons[i], ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), tint_color)) {
             *selected_tab = i;
         }
 
