@@ -6,11 +6,17 @@
 #include "imgui/imgui_impl_dx11.h"
 
 #include "imgui/fonts/poppins_extrabold.h"
+#include "imgui/fonts/poppins_bold.h"
+#include "imgui/fonts/poppins_semibold.h"
 #include "imgui/fonts/poppins_regular.h"
+#include "overlay/imgui/icons/eye_icon.h"
+#include "overlay/imgui/icons/cog_icon.h"
+#include "overlay/imgui/icons/user_icon.h"
 
-#include "overlay.h"
 #include "helpers.hpp"
 #include "../Settings/settings.h"
+#include "custom.h"
+#include "overlay.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -78,7 +84,7 @@ void Overlay::Run() {
 }
 
 bool Overlay::CreateOverlayWindow() {
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, m_window_name.c_str(), nullptr };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, m_window_name.c_str(), nullptr };
     RegisterClassEx(&wc);
 
     RECT client_rect;
@@ -94,7 +100,7 @@ bool Overlay::CreateOverlayWindow() {
     int height = bottom_right.y - top_left.y;
 
     m_hwnd = CreateWindowEx(
-        WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
+        WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED,
         m_window_name.c_str(),
         m_window_name.c_str(),
         WS_POPUP,
@@ -102,6 +108,8 @@ bool Overlay::CreateOverlayWindow() {
         nullptr, nullptr, wc.hInstance, this);
 
     if (!m_hwnd) return false;
+
+    SetLayeredWindowAttributes(m_hwnd, RGB(0, 0, 0), BYTE(255), LWA_ALPHA);
 
     MARGINS margins = { -1 };
     DwmExtendFrameIntoClientArea(m_hwnd, &margins);
@@ -135,6 +143,8 @@ bool Overlay::InitDX11() {
     if (D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &scd, &m_pSwapChain, &m_pd3dDevice, &featureLevel, &m_pd3dDeviceContext) != S_OK)
         return false;
 
+    g_pd3dDevice = m_pd3dDevice;
+
     CreateRenderTarget();
     return true;
 }
@@ -142,7 +152,7 @@ bool Overlay::InitDX11() {
 void Overlay::CreateRenderTarget() {
     ID3D11Texture2D* pBackBuffer = nullptr;
 
-    HRESULT hr = m_pSwapChain->GetBuffer(0, IID_PP_ARGS(&pBackBuffer));
+    HRESULT hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
     if (FAILED(hr) || !pBackBuffer) {
         m_mainRenderTargetView = nullptr;
         return;
@@ -192,18 +202,30 @@ void Overlay::InitImGui()
     cfg.PixelSnapH = true;
     cfg.OversampleH = cfg.OversampleV = 1;
 
+    m_poppins_semibold = io.Fonts->AddFontFromMemoryTTF(poppins_semibold, sizeof(poppins_semibold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     m_poppins_regular = io.Fonts->AddFontFromMemoryTTF(poppins_regular, sizeof(poppins_regular), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
+    m_poppins_bold = io.Fonts->AddFontFromMemoryTTF(poppins_bold, sizeof(poppins_bold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     m_poppins_extrabold = io.Fonts->AddFontFromMemoryTTF(poppins_extrabold, sizeof(poppins_extrabold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
+
+    Custom::LoadTextureFromMemory(m_pd3dDevice, eye_icon, 32, 32, &m_eye_icon_texture);
+    Custom::LoadTextureFromMemory(m_pd3dDevice, cog_icon, 32, 32, &m_cog_icon_texture);
+    Custom::LoadTextureFromMemory(m_pd3dDevice, user_icon, 32, 32, &m_user_icon_texture);
 }
 
 void Overlay::Cleanup() {
+    Custom::Shutdown();
+
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
+    if (m_eye_icon_texture) { m_eye_icon_texture->Release(); m_eye_icon_texture = nullptr; }
+    if (m_cog_icon_texture) { m_cog_icon_texture->Release(); m_cog_icon_texture = nullptr; }
+    if (m_user_icon_texture) { m_user_icon_texture->Release(); m_user_icon_texture = nullptr; }
+
     if (m_pSwapChain) { m_pSwapChain->Release(); m_pSwapChain = nullptr; }
     if (m_pd3dDeviceContext) { m_pd3dDeviceContext->Release(); m_pd3dDeviceContext = nullptr; }
-    if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; }
+    if (m_pd3dDevice) { m_pd3dDevice->Release(); m_pd3dDevice = nullptr; g_pd3dDevice = nullptr; }
     if (m_mainRenderTargetView) { m_mainRenderTargetView->Release(); m_mainRenderTargetView = nullptr; }
 
     if (m_hwnd) {
@@ -255,22 +277,13 @@ void Overlay::Render() {
         RenderLoadingAnimation();
     }
     else {
-        if (GetAsyncKeyState(VK_INSERT) & 1)
-            NoSave::menuOpened = !NoSave::menuOpened;
-
-        static bool last_menu_state = !NoSave::menuOpened; // Force update on first frame
-        if (last_menu_state != NoSave::menuOpened) {
-            LONG_PTR style = GetWindowLongPtr(m_hwnd, GWL_EXSTYLE);
-            if (NoSave::menuOpened) {
-                style &= ~WS_EX_TRANSPARENT;
-            } else {
-                style |= WS_EX_TRANSPARENT;
+        if (GetAsyncKeyState(VK_INSERT) & 1) {
+            if (!NoSave::menuOpened) {
+                NoSave::menuOpened = true;
             }
-            SetWindowLongPtr(m_hwnd, GWL_EXSTYLE, style);
-
-            // Force the change to take effect for hit-testing
-            SetWindowPos(m_hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-            last_menu_state = NoSave::menuOpened;
+            else {
+                NoSave::menuOpened = false;
+            }
         }
 
         if (NoSave::debugMode) {
@@ -288,13 +301,19 @@ void Overlay::Render() {
     m_pd3dDeviceContext->ClearRenderTargetView(m_mainRenderTargetView, clear_color_with_alpha);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
+    LONG exStyle = GetWindowLong(Overlay::m_hwnd, GWL_EXSTYLE);
+    if (NoSave::menuOpened)
+        SetWindowLong(Overlay::m_hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TRANSPARENT);
+    else
+        SetWindowLong(Overlay::m_hwnd, GWL_EXSTYLE, exStyle | WS_EX_TRANSPARENT);
+
     m_pSwapChain->Present(1, 0);
 }
 
 void Overlay::RenderMenu()
 {
-    const float menuWidth = 850.0f;
-    const float menuHeight = 520.0f;
+    const float menuWidth = 870.0f;
+    const float menuHeight = 550.0f;
 
     ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), ImGui::GetIO().DisplaySize, IM_COL32(0, 0, 0, 160));
     ImVec2 centerPos((ImGui::GetIO().DisplaySize.x - menuWidth) * 0.5f, (ImGui::GetIO().DisplaySize.y - menuHeight) * 0.5f);
@@ -304,8 +323,8 @@ void Overlay::RenderMenu()
 
     if (ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar))
     {
-        const float headerHeight = 38.0f;
-        const float footerHeight = 38.0f;
+        const float headerHeight = 55.0f;
+        const float footerHeight = 55.0f;
 
         ImVec2 winPos = ImGui::GetWindowPos();
         ImVec2 winSize = ImGui::GetWindowSize();
@@ -316,13 +335,64 @@ void Overlay::RenderMenu()
 
         ImGui::GetWindowDrawList()->AddRectFilled(winPos, ImVec2(winPos.x + winSize.x, winPos.y + headerHeight), IM_COL32(22, 22, 22, 255), 9.0f, ImDrawFlags_RoundCornersTop);
 
-        const char* title = "Flawless.win";
-        ImVec2 textSize = ImGui::CalcTextSize(title);
-        float textY = winPos.y + (headerHeight - textSize.y) * 0.5f;
-        ImVec2 textPos = ImGui::GetCursorScreenPos();
-        textPos.y = textY;
+        const char* titleMain = "Flawless";
+        const char* titleAccent = ".win";
 
-        ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), title);
+        ImVec2 mainSize = ImGui::CalcTextSize(titleMain);
+        ImVec2 accentSize = ImGui::CalcTextSize(titleAccent);
+
+        float textY = winPos.y + (headerHeight - mainSize.y) * 0.5f;
+        float textX = winPos.x + 15.0f;
+        const int slices = 150;
+
+        ImVec4 topColMain = ImVec4(220.0f / 255.0f, 220.0f / 255.0f, 220.0f / 255.0f, 1.0f);
+        ImVec4 botColMain = ImVec4(150.0f / 255.0f, 150.0f / 255.0f, 150.0f / 255.0f, 1.0f);
+        ImVec4 topCol = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f );
+        ImVec4 botCol = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
+
+        float slice_h_main = mainSize.y / slices;
+
+        for (int i = 0; i < slices; i++)
+        {
+            float t = (float)i / (slices - 1);
+            ImVec4 col;
+            col.x = topColMain.x + (botColMain.x - topColMain.x) * t;
+            col.y = topColMain.y + (botColMain.y - topColMain.y) * t;
+            col.z = topColMain.z + (botColMain.z - topColMain.z) * t;
+            col.w = topColMain.w + (botColMain.w - topColMain.w) * t;
+
+            ImU32 color = ImGui::GetColorU32(col);
+
+            ImVec2 clip_min(textX, textY + slice_h_main * i);
+            ImVec2 clip_max(textX + mainSize.x, clip_min.y + slice_h_main);
+
+            ImGui::GetWindowDrawList()->PushClipRect(clip_min, clip_max, true);
+            ImGui::GetWindowDrawList()->AddText(ImVec2(textX, textY), color, titleMain);
+            ImGui::GetWindowDrawList()->PopClipRect();
+        }
+
+        float slice_h_accent = accentSize.y / slices;
+        float accentX = textX + mainSize.x;
+
+        for (int i = 0; i < slices; i++)
+        {
+            float t = (float)i / (slices - 1);
+            ImVec4 col;
+            col.x = topCol.x + (botCol.x - topCol.x) * t;
+            col.y = topCol.y + (botCol.y - topCol.y) * t;
+            col.z = topCol.z + (botCol.z - topCol.z) * t;
+            col.w = topCol.w + (botCol.w - topCol.w) * t;
+
+            ImU32 color = ImGui::GetColorU32(col);
+
+            ImVec2 clip_min(accentX, textY + slice_h_accent * i);
+            ImVec2 clip_max(accentX + accentSize.x, clip_min.y + slice_h_accent);
+
+            ImGui::GetWindowDrawList()->PushClipRect(clip_min, clip_max, true);
+            ImGui::GetWindowDrawList()->AddText(ImVec2(accentX, textY), color, titleAccent);
+            ImGui::GetWindowDrawList()->PopClipRect();
+        }
+
         ImGui::GetWindowDrawList()->AddLine(ImVec2(winPos.x, winPos.y + headerHeight), ImVec2(winPos.x + winSize.x, winPos.y + headerHeight), accentColor, 1.0f);
         ImGui::GetWindowDrawList()->AddRectFilledMultiColor(ImVec2(winPos.x, winPos.y + headerHeight), ImVec2(winPos.x + winSize.x, winPos.y + headerHeight + 45), topColor, topColor, topTransparent, topTransparent);
         ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(winPos.x, winPos.y + winSize.y - footerHeight), ImVec2(winPos.x + winSize.x, winPos.y + winSize.y), IM_COL32(22, 22, 22, 255), 9.0f, ImDrawFlags_RoundCornersBottom);
@@ -330,6 +400,10 @@ void Overlay::RenderMenu()
         ImGui::GetWindowDrawList()->AddRectFilledMultiColor(ImVec2(winPos.x, winPos.y + winSize.y - footerHeight - 45), ImVec2(winPos.x + winSize.x, winPos.y + winSize.y - footerHeight), topTransparent, topTransparent, topColor, topColor);
 
         ImGui::Dummy(ImVec2(0, headerHeight));
+
+        static int selected_tab = 0;
+        ID3D11ShaderResourceView* icons[] = { m_eye_icon_texture, m_cog_icon_texture, m_user_icon_texture };
+        Custom::RenderTabs(&selected_tab, footerHeight, icons, 3);
 
         ImGui::End();
     }
@@ -401,7 +475,7 @@ void Overlay::RenderLoadingAnimation() {
     float slice_h = size.y / slices;
     for (int i = 0; i < slices; i++) {
         float g = (float)i / (slices - 1);
-        ImU8 col = static_cast<ImU8>(200.0f - g * 80.0f);
+        ImU8 col = static_cast<ImU8>(200.0f - g * 120.0f);
         ImU32 color = IM_COL32(col, col, col, (int)(255 * text_alpha));
 
         ImVec2 clip_min(pos.x, pos.y + slice_h * i);
@@ -430,7 +504,8 @@ void Overlay::RenderLoadingAnimation() {
         const int dot_slices = 150;
         float dot_slice_h = dot_size.y / dot_slices;
 
-        for (int i = 0; i < dot_slices; i++) {
+        for (int i = 0; i < dot_slices; i++)
+        {
             float g = (float)i / (dot_slices - 1);
             ImU8 r = static_cast<ImU8>(Theme::Accent[0] * 255.0f - g * 135.0f);
             ImU8 gr = static_cast<ImU8>(Theme::Accent[1] * 255.0f - g * 50.0f);
