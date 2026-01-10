@@ -1,14 +1,7 @@
 #pragma once
 #include <vector>
-
-struct ImFont;
-
-struct TabInfo {
-    const char* icon;
-    const char* name;
-};
-
-struct ImVec4;
+#include "tab_info.h"
+#include "imgui/imgui.h"
 
 namespace Custom {
     inline constexpr float TAB_HEIGHT = 40.0f;

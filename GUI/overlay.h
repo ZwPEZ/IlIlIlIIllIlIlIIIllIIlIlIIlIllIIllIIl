@@ -1,6 +1,7 @@
 #pragma once
 #include "custom.h"
 #include <vector>
+#include "tab_info.h"
 
 class Overlay {
 public:

@@ -1,5 +1,4 @@
 #include "custom.h"
-#include "overlay.h"
 #include "../Settings/settings.h"
 #include "imgui/imgui_internal.h"
 
@@ -40,6 +39,8 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
 
     static float indicator_pos_x = 0.0f;
     static float indicator_width = 0.0f;
+    float target_indicator_pos_x = indicator_pos_x;
+    float target_indicator_width = indicator_width;
 
     const float tab_spacing = 40.0f;
     const float icon_text_spacing = 5.0f;
@@ -68,15 +69,10 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
         }
         indicator_pos_x = start_x_screen + initial_tab_offset;
         indicator_width = (std::max)(ImGui::CalcTextSize(tabs[selected_tab].icon).x, ImGui::CalcTextSize(tabs[selected_tab].name).x);
-        target_indicator_pos_x = indicator_pos_x;
-        target_indicator_width = indicator_width;
     }
 
     // Center the tabs horizontally
     ImGui::SetCursorPosX((win_size.x - total_tabs_width) * 0.5f);
-
-    float target_indicator_pos_x = indicator_pos_x;
-    float target_indicator_width = indicator_width;
 
     for (int i = 0; i < tabs.size(); ++i) {
         const auto& tab = tabs[i];
