@@ -205,14 +205,14 @@ void Overlay::InitImGui()
     m_poppins_extrabold = io.Fonts->AddFontFromMemoryTTF(poppins_extrabold, sizeof(poppins_extrabold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
 
     ImFontConfig icon_cfg;
-    icon_cfg.MergeMode = true;
     icon_cfg.PixelSnapH = true;
     icon_cfg.FontDataOwnedByAtlas = false;
     static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    io.Fonts->AddFontFromMemoryTTF(fa_solid_900_ttf, sizeof(fa_solid_900_ttf), 16.0f, &icon_cfg, icon_ranges);
+    m_icon_font = io.Fonts->AddFontFromMemoryTTF(fa_solid_900_ttf, sizeof(fa_solid_900_ttf), 16.0f, &icon_cfg, icon_ranges);
 
-    m_tabs.push_back({ ICON_FA_EYE, "Visuals" });
-    m_tabs.push_back({ ICON_FA_CROSSHAIRS, "Aimbot" });
+    m_tabs.push_back({ ICON_FA_BULLSEYE, "Rage" });
+    m_tabs.push_back({ ICON_FA_COG, "Legit" });
+    m_tabs.push_back({ ICON_FA_MOON, "Visuals" });
 }
 
 void Overlay::Cleanup() {
@@ -396,14 +396,17 @@ void Overlay::RenderMenu()
 
         // Content
         if (m_selected_tab == 0) {
-            ImGui::Text("Visuals Tab Content");
+            ImGui::Text("Rage Tab Content");
         }
         else if (m_selected_tab == 1) {
-            ImGui::Text("Aimbot Tab Content");
+            ImGui::Text("Legit Tab Content");
+        }
+        else if (m_selected_tab == 2) {
+            ImGui::Text("Visuals Tab Content");
         }
 
         ImGui::SetCursorPosY(winSize.y - footerHeight);
-        Custom::RenderTabs(m_selected_tab, m_tabs);
+        Custom::RenderTabs(m_selected_tab, m_tabs, m_icon_font);
 
         ImGui::End();
     }

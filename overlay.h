@@ -53,6 +53,7 @@ private:
     ImFont* m_poppins_regular = nullptr;
     ImFont* m_poppins_bold = nullptr;
     ImFont* m_poppins_extrabold = nullptr;
+    ImFont* m_icon_font = nullptr;
 
     std::vector<TabInfo> m_tabs;
     int m_selected_tab = 0;

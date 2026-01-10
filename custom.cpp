@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 
-void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
+void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImFont* icon_font)
 {
     if (tabs.empty()) {
         return;
@@ -16,7 +16,7 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
     static float indicator_width = 0.0f;
 
     const float tab_height = 40.0f;
-    const float tab_spacing = 20.0f;
+    const float tab_spacing = 40.0f;
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 win_pos = ImGui::GetWindowPos();
@@ -25,12 +25,14 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
 
     float total_tabs_width = 0.0f;
     for (const auto& tab : tabs) {
-        total_tabs_width += ImGui::CalcTextSize(tab.icon).x + ImGui::CalcTextSize(tab.name).x + 20.0f;
+        float icon_width = ImGui::CalcTextSize(tab.icon).x;
+        float name_width = ImGui::CalcTextSize(tab.name).x;
+        total_tabs_width += std::max(icon_width, name_width);
     }
     total_tabs_width += (tabs.size() - 1) * tab_spacing;
 
     float start_x = win_pos.x + (win_size.x - total_tabs_width) * 0.5f;
-    float cursor_y = win_pos.y + win_size.y - footer_height + (footer_height - tab_height) * 0.5f;
+    float cursor_y = win_pos.y + win_size.y - footer_height + 5.0f;
 
     ImGui::SetCursorScreenPos(ImVec2(start_x, cursor_y));
 
@@ -47,18 +49,23 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
 
         float icon_width = ImGui::CalcTextSize(tab.icon).x;
         float name_width = ImGui::CalcTextSize(tab.name).x;
-        float tab_width = icon_width + name_width + 20.0f;
+        float tab_width = std::max(icon_width, name_width);
 
         bool is_selected = (selected_tab == i);
 
         ImGui::PushStyleColor(ImGuiCol_Text, is_selected ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0f);
+
+        ImGui::PushFont(icon_font);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (tab_width - icon_width) * 0.5f);
         ImGui::Text("%s", tab.icon);
-        ImGui::SameLine(0, 5.0f);
+        ImGui::PopFont();
+
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (tab_width - name_width) * 0.5f);
         ImGui::Text("%s", tab.name);
         ImGui::PopStyleColor();
 
-        ImGui::SetCursorScreenPos(ImVec2(ImGui::GetItemRectMin().x - 10.0f, ImGui::GetItemRectMin().y));
+        ImVec2 tab_min = ImGui::GetItemRectMin();
+        ImGui::SetCursorScreenPos(ImVec2(tab_min.x, cursor_y));
         if (ImGui::InvisibleButton("##tab", ImVec2(tab_width, tab_height))) {
             selected_tab = i;
         }
@@ -75,10 +82,10 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
     if (indicator_width == 0.0f) {
         float initial_tab_offset = 0.0f;
         for (int i = 0; i < selected_tab; ++i) {
-            initial_tab_offset += ImGui::CalcTextSize(tabs[i].icon).x + ImGui::CalcTextSize(tabs[i].name).x + 20.0f + tab_spacing;
+            initial_tab_offset += std::max(ImGui::CalcTextSize(tabs[i].icon).x, ImGui::CalcTextSize(tabs[i].name).x) + tab_spacing;
         }
         indicator_pos_x = start_x + initial_tab_offset;
-        indicator_width = ImGui::CalcTextSize(tabs[selected_tab].icon).x + ImGui::CalcTextSize(tabs[selected_tab].name).x + 20.0f;
+        indicator_width = std::max(ImGui::CalcTextSize(tabs[selected_tab].icon).x, ImGui::CalcTextSize(tabs[selected_tab].name).x);
         target_indicator_pos_x = indicator_pos_x;
         target_indicator_width = indicator_width;
     }
@@ -87,7 +94,7 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
     indicator_pos_x = ImLerp(indicator_pos_x, target_indicator_pos_x, ImGui::GetIO().DeltaTime * animation_speed);
     indicator_width = ImLerp(indicator_width, target_indicator_width, ImGui::GetIO().DeltaTime * animation_speed);
 
-    float indicator_y = win_pos.y + win_size.y - footer_height + 1.0f;
+    float indicator_y = win_pos.y + win_size.y - 5.0f;
     float indicator_height = 2.0f;
 
     ImU32 accent_color = ImGui::ColorConvertFloat4ToU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f));
