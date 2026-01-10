@@ -6,26 +6,29 @@
 #include <vector>
 #include <algorithm>
 
-void Custom::RenderTabs(int& selected_tab, const std::vector<ID3D11ShaderResourceView*>& icons)
+void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs)
 {
-    if (icons.empty()) {
+    if (tabs.empty()) {
         return;
     }
 
     static float indicator_pos_x = 0.0f;
-    static float indicator_width = 40.0f;
+    static float indicator_width = 0.0f;
 
-    const float tab_width = 40.0f;
     const float tab_height = 40.0f;
     const float tab_spacing = 20.0f;
-    const ImVec2 tab_size(tab_width, tab_height);
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 win_pos = ImGui::GetWindowPos();
     ImVec2 win_size = ImGui::GetWindowSize();
     const float footer_height = 55.0f;
 
-    float total_tabs_width = (icons.size() * tab_width) + (std::max(0, (int)icons.size() - 1) * tab_spacing);
+    float total_tabs_width = 0.0f;
+    for (const auto& tab : tabs) {
+        total_tabs_width += ImGui::CalcTextSize(tab.icon).x + ImGui::CalcTextSize(tab.name).x + 20.0f;
+    }
+    total_tabs_width += (tabs.size() - 1) * tab_spacing;
+
     float start_x = win_pos.x + (win_size.x - total_tabs_width) * 0.5f;
     float cursor_y = win_pos.y + win_size.y - footer_height + (footer_height - tab_height) * 0.5f;
 
@@ -34,27 +37,31 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<ID3D11ShaderResourc
     float target_indicator_pos_x = indicator_pos_x;
     float target_indicator_width = indicator_width;
 
-    for (int i = 0; i < icons.size(); ++i) {
+    for (int i = 0; i < tabs.size(); ++i) {
+        const auto& tab = tabs[i];
         ImGui::PushID(i);
 
         if (i > 0) {
             ImGui::SameLine(0, tab_spacing);
         }
 
+        float icon_width = ImGui::CalcTextSize(tab.icon).x;
+        float name_width = ImGui::CalcTextSize(tab.name).x;
+        float tab_width = icon_width + name_width + 20.0f;
+
         bool is_selected = (selected_tab == i);
-        ImVec4 tint_color = is_selected
-            ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f)
-            : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_Text, is_selected ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0f);
+        ImGui::Text("%s", tab.icon);
+        ImGui::SameLine(0, 5.0f);
+        ImGui::Text("%s", tab.name);
+        ImGui::PopStyleColor();
 
-        if (ImGui::ImageButton("##tab", (void*)icons[i], tab_size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(0,0,0,0), tint_color)) {
+        ImGui::SetCursorScreenPos(ImVec2(ImGui::GetItemRectMin().x - 10.0f, ImGui::GetItemRectMin().y));
+        if (ImGui::InvisibleButton("##tab", ImVec2(tab_width, tab_height))) {
             selected_tab = i;
         }
-
-        ImGui::PopStyleColor(3);
 
         if (is_selected) {
             ImRect tab_rect = ImGui::GetItemRect();
@@ -65,10 +72,15 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<ID3D11ShaderResourc
         ImGui::PopID();
     }
 
-    if (indicator_pos_x == 0.0f) {
-        float initial_tab_offset = (selected_tab * tab_width) + (std::max(0, selected_tab) * tab_spacing);
+    if (indicator_width == 0.0f) {
+        float initial_tab_offset = 0.0f;
+        for (int i = 0; i < selected_tab; ++i) {
+            initial_tab_offset += ImGui::CalcTextSize(tabs[i].icon).x + ImGui::CalcTextSize(tabs[i].name).x + 20.0f + tab_spacing;
+        }
         indicator_pos_x = start_x + initial_tab_offset;
+        indicator_width = ImGui::CalcTextSize(tabs[selected_tab].icon).x + ImGui::CalcTextSize(tabs[selected_tab].name).x + 20.0f;
         target_indicator_pos_x = indicator_pos_x;
+        target_indicator_width = indicator_width;
     }
 
     float animation_speed = 15.0f;

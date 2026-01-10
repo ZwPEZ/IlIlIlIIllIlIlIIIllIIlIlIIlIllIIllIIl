@@ -9,8 +9,8 @@
 #include "imgui/fonts/poppins_bold.h"
 #include "imgui/fonts/poppins_semibold.h"
 #include "imgui/fonts/poppins_regular.h"
-
-#include "imgui/icons/eye_icon.h"
+#include "imgui/icons/IconsFontAwesome5.h"
+#include "fa-solid-900.h"
 
 #include "overlay.h"
 #include "custom.h"
@@ -204,15 +204,18 @@ void Overlay::InitImGui()
     m_poppins_bold = io.Fonts->AddFontFromMemoryTTF(poppins_bold, sizeof(poppins_bold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
     m_poppins_extrabold = io.Fonts->AddFontFromMemoryTTF(poppins_extrabold, sizeof(poppins_extrabold), 20.0f, &cfg, io.Fonts->GetGlyphRangesCyrillic());
 
-    LoadTextureFromMemory(m_pd3dDevice, eye_icon_data, sizeof(eye_icon_data), &m_eye_icon_texture);
-    m_tab_icons.push_back(m_eye_icon_texture);
+    ImFontConfig icon_cfg;
+    icon_cfg.MergeMode = true;
+    icon_cfg.PixelSnapH = true;
+    icon_cfg.FontDataOwnedByAtlas = false;
+    static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    io.Fonts->AddFontFromMemoryTTF(fa_solid_900_ttf, sizeof(fa_solid_900_ttf), 16.0f, &icon_cfg, icon_ranges);
+
+    m_tabs.push_back({ ICON_FA_EYE, "Visuals" });
+    m_tabs.push_back({ ICON_FA_CROSSHAIRS, "Aimbot" });
 }
 
 void Overlay::Cleanup() {
-    if (m_eye_icon_texture) {
-        m_eye_icon_texture->Release();
-        m_eye_icon_texture = nullptr;
-    }
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -395,9 +398,12 @@ void Overlay::RenderMenu()
         if (m_selected_tab == 0) {
             ImGui::Text("Visuals Tab Content");
         }
+        else if (m_selected_tab == 1) {
+            ImGui::Text("Aimbot Tab Content");
+        }
 
         ImGui::SetCursorPosY(winSize.y - footerHeight);
-        Custom::RenderTabs(m_selected_tab, m_tab_icons);
+        Custom::RenderTabs(m_selected_tab, m_tabs);
 
         ImGui::End();
     }
