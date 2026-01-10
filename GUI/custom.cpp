@@ -8,7 +8,7 @@
 namespace Custom {
     void RenderTextGradient(const char* text, ImVec2 pos, ImVec4 topColor, ImVec4 bottomColor) {
         ImVec2 textSize = ImGui::CalcTextSize(text);
-        const int slices = 120;
+        const int slices = 150;
         float slice_h = textSize.y / slices;
 
         for (int i = 0; i < slices; i++) {
@@ -41,6 +41,11 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     static float indicator_width = 0.0f;
     float target_indicator_pos_x = indicator_pos_x;
     float target_indicator_width = indicator_width;
+    static std::vector<ImVec4> tab_colors;
+
+    if (tab_colors.empty() || tab_colors.size() != tabs.size()) {
+        tab_colors.resize(tabs.size(), ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+    }
 
     const float tab_spacing = 40.0f;
     const float icon_text_spacing = 5.0f;
@@ -62,13 +67,20 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     total_tabs_width += (tabs.size() - 1) * tab_spacing;
 
     if (indicator_width == 0.0f) {
-        float start_x_screen = win_pos.x + (win_size.x - total_tabs_width) * 0.5f;
         float initial_tab_offset = 0.0f;
         for (int i = 0; i < selected_tab; ++i) {
-            initial_tab_offset += (std::max)(ImGui::CalcTextSize(tabs[i].icon).x, ImGui::CalcTextSize(tabs[i].name).x) + tab_spacing;
+            ImGui::PushFont(icon_font);
+            float icon_width = ImGui::CalcTextSize(tabs[i].icon).x;
+            ImGui::PopFont();
+            float name_width = ImGui::CalcTextSize(tabs[i].name).x;
+            initial_tab_offset += (std::max)(icon_width, name_width) + tab_spacing;
         }
-        indicator_pos_x = start_x_screen + initial_tab_offset;
-        indicator_width = (std::max)(ImGui::CalcTextSize(tabs[selected_tab].icon).x, ImGui::CalcTextSize(tabs[selected_tab].name).x);
+        indicator_pos_x = (win_size.x - total_tabs_width) * 0.5f + initial_tab_offset;
+        ImGui::PushFont(icon_font);
+        float icon_width = ImGui::CalcTextSize(tabs[selected_tab].icon).x;
+        ImGui::PopFont();
+        float name_width = ImGui::CalcTextSize(tabs[selected_tab].name).x;
+        indicator_width = (std::max)(icon_width, name_width);
     }
 
     // Center the tabs horizontally
@@ -94,18 +106,15 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
 
         bool is_selected = (selected_tab == i);
 
-        ImVec4 top_color, bottom_color;
-        if (is_selected) {
-            top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
-            bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
-        } else {
-            top_color = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-            bottom_color = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
-        }
+        ImVec4 target_color = is_selected ? ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+        tab_colors[i] = ImLerp(tab_colors[i], target_color, ImGui::GetIO().DeltaTime * 15.0f);
+
+        ImVec4 top_color = tab_colors[i];
+        ImVec4 bottom_color = ImVec4(tab_colors[i].x * 0.7f, tab_colors[i].y * 0.7f, tab_colors[i].z * 0.7f, 1.0f);
 
         // Center icon and text vertically
         float total_height = icon_size.y + name_size.y + icon_text_spacing;
-        float start_y = ImGui::GetCursorPosY() + (Custom::TAB_HEIGHT - total_height) * 0.5f;
+        float start_y = tab_start_pos.y + (Custom::TAB_HEIGHT - total_height) * 0.5f;
 
         ImGui::PushFont(icon_font);
         RenderTextGradient(tab.icon, ImVec2(tab_start_pos.x + (tab_width - icon_size.x) * 0.5f, start_y), top_color, bottom_color);
@@ -122,7 +131,7 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
             ImVec2 min = ImGui::GetItemRectMin();
             ImVec2 max = ImGui::GetItemRectMax();
 
-            target_indicator_pos_x = min.x;
+            target_indicator_pos_x = min.x - win_pos.x;
             target_indicator_width = max.x - min.x;
         }
 
@@ -145,22 +154,22 @@ void Custom::RenderTabs(int& selected_tab, const std::vector<TabInfo>& tabs, ImF
     const float rounding = 5.0f;
 
     draw_list->AddRectFilled(
-        ImVec2(indicator_pos_x - 3.0f, indicator_y - 3.0f),
-        ImVec2(indicator_pos_x + indicator_width + 3.0f, indicator_y + indicator_height + 3.0f),
+        ImVec2(win_pos.x + indicator_pos_x - 3.0f, indicator_y - 3.0f),
+        ImVec2(win_pos.x + indicator_pos_x + indicator_width + 3.0f, indicator_y + indicator_height + 3.0f),
         glow_color_2,
         rounding
     );
 
     draw_list->AddRectFilled(
-        ImVec2(indicator_pos_x - 1.5f, indicator_y - 1.5f),
-        ImVec2(indicator_pos_x + indicator_width + 1.5f, indicator_y + indicator_height + 1.5f),
+        ImVec2(win_pos.x + indicator_pos_x - 1.5f, indicator_y - 1.5f),
+        ImVec2(win_pos.x + indicator_pos_x + indicator_width + 1.5f, indicator_y + indicator_height + 1.5f),
         glow_color_1,
         rounding
     );
 
     draw_list->AddRectFilled(
-        ImVec2(indicator_pos_x, indicator_y),
-        ImVec2(indicator_pos_x + indicator_width, indicator_y + indicator_height),
+        ImVec2(win_pos.x + indicator_pos_x, indicator_y),
+        ImVec2(win_pos.x + indicator_pos_x + indicator_width, indicator_y + indicator_height),
         accent_color,
         rounding
     );
