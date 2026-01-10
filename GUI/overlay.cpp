@@ -37,55 +37,14 @@ void Overlay::RenderMenu()
 
         float textY = winPos.y + (headerHeight - mainSize.y) * 0.5f;
         float textX = winPos.x + 15.0f;
-        const int slices = 120;
 
         ImVec4 topColMain = ImVec4(220.0f / 255.0f, 220.0f / 255.0f, 220.0f / 255.0f, 1.0f);
         ImVec4 botColMain = ImVec4(150.0f / 255.0f, 150.0f / 255.0f, 150.0f / 255.0f, 1.0f);
         ImVec4 topCol = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f );
         ImVec4 botCol = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
 
-        float slice_h_main = mainSize.y / slices;
-
-        for (int i = 0; i < slices; i++)
-        {
-            float t = (float)i / (slices - 1);
-            ImVec4 col;
-            col.x = topColMain.x + (botColMain.x - topColMain.x) * t;
-            col.y = topColMain.y + (botColMain.y - topColMain.y) * t;
-            col.z = topColMain.z + (botColMain.z - topColMain.z) * t;
-            col.w = topColMain.w + (botColMain.w - topColMain.w) * t;
-
-            ImU32 color = ImGui::GetColorU32(col);
-
-            ImVec2 clip_min(textX, textY + slice_h_main * i);
-            ImVec2 clip_max(textX + mainSize.x, clip_min.y + slice_h_main);
-
-            ImGui::GetWindowDrawList()->PushClipRect(clip_min, clip_max, true);
-            ImGui::GetWindowDrawList()->AddText(ImVec2(textX, textY), color, titleMain);
-            ImGui::GetWindowDrawList()->PopClipRect();
-        }
-
-        float slice_h_accent = accentSize.y / slices;
-        float accentX = textX + mainSize.x;
-
-        for (int i = 0; i < slices; i++)
-        {
-            float t = (float)i / (slices - 1);
-            ImVec4 col;
-            col.x = topCol.x + (botCol.x - topCol.x) * t;
-            col.y = topCol.y + (botCol.y - topCol.y) * t;
-            col.z = topCol.z + (botCol.z - topCol.z) * t;
-            col.w = topCol.w + (botCol.w - topCol.w) * t;
-
-            ImU32 color = ImGui::GetColorU32(col);
-
-            ImVec2 clip_min(accentX, textY + slice_h_accent * i);
-            ImVec2 clip_max(accentX + accentSize.x, clip_min.y + slice_h_accent);
-
-            ImGui::GetWindowDrawList()->PushClipRect(clip_min, clip_max, true);
-            ImGui::GetWindowDrawList()->AddText(ImVec2(accentX, textY), color, titleAccent);
-            ImGui::GetWindowDrawList()->PopClipRect();
-        }
+        Custom::RenderTextGradient(titleMain, ImVec2(textX, textY), topColMain, botColMain);
+        Custom::RenderTextGradient(titleAccent, ImVec2(textX + mainSize.x, textY), topCol, botCol);
 
         ImGui::GetWindowDrawList()->AddLine(ImVec2(winPos.x, winPos.y + headerHeight), ImVec2(winPos.x + winSize.x, winPos.y + headerHeight), accentColor, 1.0f);
         ImGui::GetWindowDrawList()->AddRectFilledMultiColor(ImVec2(winPos.x, winPos.y + headerHeight), ImVec2(winPos.x + winSize.x, winPos.y + headerHeight + 45), topColor, topColor, topTransparent, topTransparent);
@@ -105,7 +64,7 @@ void Overlay::RenderMenu()
 
         float footerCenterY = winSize.y - footerHeight + (footerHeight - Custom::TAB_HEIGHT) * 0.5f;
         ImGui::SetCursorPosY(footerCenterY);
-        Custom::RenderTabs(m_selected_tab, m_tabs, m_icon_font);
+        Custom::RenderTabs(m_selected_tab, m_tabs, m_icon_font, m_smaller_font);
 
         ImGui::End();
     }
