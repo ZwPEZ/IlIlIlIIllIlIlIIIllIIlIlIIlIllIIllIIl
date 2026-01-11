@@ -39,12 +39,12 @@ namespace Custom {
         ImDrawList* draw = ImGui::GetWindowDrawList();
 
         ImVec2 start_pos = ImGui::GetCursorScreenPos();
-        float width = ImGui::GetContentRegionAvail().x;
+        float width = ImGui::GetColumnWidth();
         float header_height = 28.0f;
 
-        ImU32 border_col = ImGui::GetColorU32(ImVec4(0.07f, 0.07f, 0.07f, 1.0f));
-        ImU32 header_col = ImGui::GetColorU32(ImVec4(0.09f, 0.09f, 0.09f, 1.0f));
-        ImU32 body_col = ImGui::GetColorU32(ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
+        ImU32 border_col = ImGui::GetColorU32(ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+        ImU32 header_col = ImGui::GetColorU32(ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
+        ImU32 body_col = ImGui::GetColorU32(ImVec4(0.08f, 0.08f, 0.08f, 1.0f));
 
         ImRect section_bb(
             start_pos,
@@ -76,13 +76,16 @@ namespace Custom {
         draw->AddLine(
             ImVec2(section_bb.Min.x, section_bb.Min.y + header_height),
             ImVec2(section_bb.Max.x, section_bb.Min.y + header_height),
-            ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f))
+            border_col
         );
 
         // Header text
-        ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
-        ImVec4 bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
-        RenderTextGradient(label, ImVec2(section_bb.Min.x + 10, section_bb.Min.y + (header_height - ImGui::CalcTextSize(label).y) * 0.5f), top_color, bottom_color);
+        draw->AddText(
+            ImVec2(section_bb.Min.x + 10,
+                section_bb.Min.y + (header_height - ImGui::GetFontSize()) * 0.5f),
+            ImGui::GetColorU32(ImGuiCol_Text),
+            label
+        );
 
         // Cursor into body
         ImGui::SetCursorScreenPos(
