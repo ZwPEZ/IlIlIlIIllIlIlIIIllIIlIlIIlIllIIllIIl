@@ -29,10 +29,10 @@ namespace Custom {
         }
     }
 
-    bool BeginSection(const char* name, float height) {
+    void BeginSection(const char* name, float height) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if (window->SkipItems)
-            return false;
+            return;
 
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
@@ -46,15 +46,6 @@ namespace Custom {
         // Header
         float width = ImGui::GetContentRegionAvail().x;
         ImRect header_bb(pos, ImVec2(pos.x + width, pos.y + 30));
-        ImGui::ItemAdd(header_bb, id);
-        bool hovered, held;
-        bool pressed = ImGui::ButtonBehavior(header_bb, id, &hovered, &held, ImGuiButtonFlags_None);
-
-        bool is_open = ImGui::TreeNodeBehavior(id, ImGuiTreeNodeFlags_DefaultOpen);
-        if (pressed) {
-            is_open = !is_open;
-            ImGui::GetStateStorage()->SetInt(id, is_open);
-        }
 
         // Gradient Text
         ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
@@ -65,8 +56,6 @@ namespace Custom {
         draw_list->AddLine(ImVec2(pos.x, pos.y + 30), ImVec2(pos.x + width, pos.y + 30), ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f)), 1.0f);
 
         ImGui::Dummy(ImVec2(0, 5));
-
-        return is_open;
     }
 
     void EndSection() {
