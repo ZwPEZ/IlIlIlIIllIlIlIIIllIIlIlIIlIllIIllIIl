@@ -51,9 +51,9 @@ namespace Custom {
 
         float header_height = 28.0f;
 
-        ImU32 border_col = ImGui::GetColorU32(ImGuiCol_Border);
-        ImU32 header_col = ImGui::GetColorU32(ImGuiCol_Header);
-        ImU32 body_col = ImGui::GetColorU32(ImGuiCol_ChildBg);
+        ImU32 border_col = ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 0.5f));
+        ImU32 header_col = ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 0.1f));
+        ImU32 body_col = ImGui::GetColorU32(ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
 
         ImRect section_bb(
             start_pos,
@@ -89,12 +89,9 @@ namespace Custom {
         );
 
         // Header text
-        draw->AddText(
-            ImVec2(section_bb.Min.x + 10,
-                section_bb.Min.y + (header_height - ImGui::GetFontSize()) * 0.5f),
-            ImGui::GetColorU32(ImGuiCol_Text),
-            label
-        );
+        ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
+        ImVec4 bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
+        RenderTextGradient(label, ImVec2(section_bb.Min.x + 10, section_bb.Min.y + (header_height - ImGui::CalcTextSize(label).y) * 0.5f), top_color, bottom_color);
 
         // Cursor into body
         ImGui::SetCursorScreenPos(
