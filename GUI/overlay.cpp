@@ -56,17 +56,14 @@ void Overlay::RenderMenu()
 
         // Content
         if (m_selected_tab == 0) {
-            Custom::BeginSectionLayout(2);
-            if (Custom::BeginSection("Targeting", 250.0f)) {
+            if (Custom::BeginSection("Targeting", 250.0f, Custom::Side::Left)) {
                 ImGui::Text("Some targeting settings here...");
                 Custom::EndSection();
             }
-            Custom::NextSection();
-            if (Custom::BeginSection("Visuals", 250.0f)) {
+            if (Custom::BeginSection("Visuals", 250.0f, Custom::Side::Middle)) {
                 ImGui::Text("Some visuals settings here...");
                 Custom::EndSection();
             }
-            Custom::EndSectionLayout();
         }
         else if (m_selected_tab == 1) {
             if (Custom::BeginSection("Aimbot", 250.0f)) {

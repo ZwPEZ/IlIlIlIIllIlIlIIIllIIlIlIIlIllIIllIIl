@@ -29,7 +29,7 @@ namespace Custom {
         }
     }
 
-    bool BeginSection(const char* label, float height)
+    bool BeginSection(const char* label, float height, Side side)
     {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if (window->SkipItems)
@@ -38,13 +38,22 @@ namespace Custom {
         ImGuiStyle& style = ImGui::GetStyle();
         ImDrawList* draw = ImGui::GetWindowDrawList();
 
+        float width = ImGui::GetContentRegionAvail().x;
+        if (side != Side::None) {
+            width = (width - style.ItemSpacing.x * 2) / 3.0f;
+        }
+
+        if (side == Side::Middle || side == Side::Right) {
+            ImGui::SameLine();
+        }
+
         ImVec2 start_pos = ImGui::GetCursorScreenPos();
-        float width = ImGui::GetColumnWidth();
+
         float header_height = 28.0f;
 
-        ImU32 border_col = ImGui::GetColorU32(ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        ImU32 header_col = ImGui::GetColorU32(ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
-        ImU32 body_col = ImGui::GetColorU32(ImVec4(0.08f, 0.08f, 0.08f, 1.0f));
+        ImU32 border_col = ImGui::GetColorU32(ImGuiCol_Border);
+        ImU32 header_col = ImGui::GetColorU32(ImGuiCol_Header);
+        ImU32 body_col = ImGui::GetColorU32(ImGuiCol_ChildBg);
 
         ImRect section_bb(
             start_pos,
@@ -113,18 +122,6 @@ namespace Custom {
     {
         ImGui::EndChild();
         ImGui::Dummy(ImVec2(0, 10)); // spacing after section
-    }
-
-    void BeginSectionLayout(int columns) {
-        ImGui::Columns(columns, nullptr, false);
-    }
-
-    void NextSection() {
-        ImGui::NextColumn();
-    }
-
-    void EndSectionLayout() {
-        ImGui::Columns(1);
     }
 }
 
