@@ -29,37 +29,87 @@ namespace Custom {
         }
     }
 
-    void BeginSection(const char* name, float height) {
+    bool BeginSection(const char* label, float height)
+    {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if (window->SkipItems)
-            return;
+            return false;
 
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-        const ImGuiID id = window->GetID(name);
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImDrawList* draw = ImGui::GetWindowDrawList();
 
-        ImGui::BeginChild(id, ImVec2(0, height), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        ImVec2 start_pos = ImGui::GetCursorScreenPos();
+        float width = ImGui::GetContentRegionAvail().x;
+        float header_height = 28.0f;
 
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 pos = ImGui::GetWindowPos();
+        ImU32 border_col = ImGui::GetColorU32(ImVec4(0.07f, 0.07f, 0.07f, 1.0f));
+        ImU32 header_col = ImGui::GetColorU32(ImVec4(0.09f, 0.09f, 0.09f, 1.0f));
+        ImU32 body_col = ImGui::GetColorU32(ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
+
+        ImRect section_bb(
+            start_pos,
+            ImVec2(start_pos.x + width, start_pos.y + height)
+        );
+
+        // Outline
+        draw->AddRect(section_bb.Min, section_bb.Max, border_col, 6.0f);
 
         // Header
-        float width = ImGui::GetContentRegionAvail().x;
-        ImRect header_bb(pos, ImVec2(pos.x + width, pos.y + 30));
+        draw->AddRectFilled(
+            section_bb.Min,
+            ImVec2(section_bb.Max.x, section_bb.Min.y + header_height),
+            header_col,
+            6.0f,
+            ImDrawFlags_RoundCornersTop
+        );
 
-        // Gradient Text
-        ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
-        ImVec4 bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
-        RenderTextGradient(name, ImVec2(pos.x + 10, pos.y + (30 - ImGui::CalcTextSize(name).y) * 0.5f), top_color, bottom_color);
+        // Body
+        draw->AddRectFilled(
+            ImVec2(section_bb.Min.x, section_bb.Min.y + header_height),
+            section_bb.Max,
+            body_col,
+            6.0f,
+            ImDrawFlags_RoundCornersBottom
+        );
 
         // Separator
-        draw_list->AddLine(ImVec2(pos.x, pos.y + 30), ImVec2(pos.x + width, pos.y + 30), ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f)), 1.0f);
+        draw->AddLine(
+            ImVec2(section_bb.Min.x, section_bb.Min.y + header_height),
+            ImVec2(section_bb.Max.x, section_bb.Min.y + header_height),
+            ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f))
+        );
 
-        ImGui::Dummy(ImVec2(0, 5));
+        // Header text
+        ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
+        ImVec4 bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
+        RenderTextGradient(label, ImVec2(section_bb.Min.x + 10, section_bb.Min.y + (header_height - ImGui::CalcTextSize(label).y) * 0.5f), top_color, bottom_color);
+
+        // Cursor into body
+        ImGui::SetCursorScreenPos(
+            ImVec2(
+                section_bb.Min.x + style.WindowPadding.x,
+                section_bb.Min.y + header_height + style.WindowPadding.y
+            )
+        );
+
+        // Begin content region
+        ImGui::BeginChild(
+            label,
+            ImVec2(
+                width - style.WindowPadding.x * 2,
+                height - header_height - style.WindowPadding.y * 2
+            ),
+            false,
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+        );
+
+        return true;
     }
 
-    void EndSection() {
+    void EndSection()
+    {
         ImGui::EndChild();
+        ImGui::Dummy(ImVec2(0, 10)); // spacing after section
     }
 
     void BeginSectionLayout(int columns) {
