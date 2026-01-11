@@ -1,7 +1,6 @@
 #include "custom.h"
 #include "../Settings/settings.h"
 #include "imgui/imgui_internal.h"
-
 #include <vector>
 #include <algorithm>
 
@@ -28,6 +27,62 @@ namespace Custom {
             ImGui::GetWindowDrawList()->AddText(pos, color, text);
             ImGui::GetWindowDrawList()->PopClipRect();
         }
+    }
+
+    bool BeginSection(const char* name, float height) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(name);
+
+        ImGui::BeginChild(id, ImVec2(0, height), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImVec2 pos = ImGui::GetWindowPos();
+
+        // Header
+        float width = ImGui::GetContentRegionAvail().x;
+        ImRect header_bb(pos, ImVec2(pos.x + width, pos.y + 30));
+        ImGui::ItemAdd(header_bb, id);
+        bool hovered, held;
+        bool pressed = ImGui::ButtonBehavior(header_bb, id, &hovered, &held, ImGuiButtonFlags_None);
+
+        bool is_open = ImGui::TreeNodeBehavior(id, ImGuiTreeNodeFlags_DefaultOpen);
+        if (pressed) {
+            is_open = !is_open;
+            ImGui::GetStateStorage()->SetInt(id, is_open);
+        }
+
+        // Gradient Text
+        ImVec4 top_color = ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f);
+        ImVec4 bottom_color = ImVec4(Theme::Accent[0] * 0.7f, Theme::Accent[1] * 0.7f, Theme::Accent[2] * 0.7f, 1.0f);
+        RenderTextGradient(name, ImVec2(pos.x + 10, pos.y + (30 - ImGui::CalcTextSize(name).y) * 0.5f), top_color, bottom_color);
+
+        // Separator
+        draw_list->AddLine(ImVec2(pos.x, pos.y + 30), ImVec2(pos.x + width, pos.y + 30), ImGui::GetColorU32(ImVec4(Theme::Accent[0], Theme::Accent[1], Theme::Accent[2], 1.0f)), 1.0f);
+
+        ImGui::Dummy(ImVec2(0, 5));
+
+        return is_open;
+    }
+
+    void EndSection() {
+        ImGui::EndChild();
+    }
+
+    void BeginSectionLayout(int columns) {
+        ImGui::Columns(columns, nullptr, false);
+    }
+
+    void NextSection() {
+        ImGui::NextColumn();
+    }
+
+    void EndSectionLayout() {
+        ImGui::Columns(1);
     }
 }
 

@@ -56,10 +56,23 @@ void Overlay::RenderMenu()
 
         // Content
         if (m_selected_tab == 0) {
-            ImGui::Text("Visuals Tab Content");
+            Custom::BeginSectionLayout(2);
+            if (Custom::BeginSection("Targeting")) {
+                ImGui::Text("Some targeting settings here...");
+                Custom::EndSection();
+            }
+            Custom::NextSection();
+            if (Custom::BeginSection("Visuals")) {
+                ImGui::Text("Some visuals settings here...");
+                Custom::EndSection();
+            }
+            Custom::EndSectionLayout();
         }
         else if (m_selected_tab == 1) {
-            ImGui::Text("Aimbot Tab Content");
+            if (Custom::BeginSection("Aimbot")) {
+                ImGui::Text("Some aimbot settings here...");
+                Custom::EndSection();
+            }
         }
 
         float footerCenterY = winSize.y - footerHeight + (footerHeight - Custom::TAB_HEIGHT) * 0.5f;
