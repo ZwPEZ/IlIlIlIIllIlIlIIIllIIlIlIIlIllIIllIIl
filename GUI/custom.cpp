@@ -4,10 +4,25 @@
 
 #include <vector>
 #include <algorithm>
+#include <map>
 
 namespace Custom {
-    static float g_RowStartY = 0.0f;
-    static float g_RowMaxHeight = 0.0f;
+    // ── Section Layout State ─────────────────────────────────────
+    static std::map<Side, float> g_ColumnNextY;
+    static int g_LastFrame = -1;
+    static float g_InitialY = 0.0f;
+    static const float SECTION_SPACING = 16.0f;
+
+    void ResetLayoutStateIfNewFrame()
+    {
+        int currentFrame = ImGui::GetFrameCount();
+        if (currentFrame != g_LastFrame)
+        {
+            g_ColumnNextY.clear();
+            g_LastFrame = currentFrame;
+            g_InitialY = ImGui::GetCursorPosY();
+        }
+    }
 
     void RenderTextGradient(const char* text, ImVec2 pos, ImVec4 topColor, ImVec4 bottomColor) {
         ImVec2 textSize = ImGui::CalcTextSize(text);
@@ -39,6 +54,8 @@ namespace Custom {
         if (window->SkipItems)
             return false;
 
+        ResetLayoutStateIfNewFrame();
+
         ImGuiStyle& style = ImGui::GetStyle();
         ImDrawList* draw = ImGui::GetWindowDrawList();
 
@@ -47,42 +64,33 @@ namespace Custom {
         const float header_height = 28.0f;
         const float rounding = 6.0f;
 
-        // ── Available area ──────────────────────────────────────────
+        // ── Horizontal layout ──────────────────────────────────────
         float avail_width = ImGui::GetWindowContentRegionWidth();
-
         int columns = (side == Side::None) ? 1 : 3;
-        float section_width =
-            (columns == 1)
-            ? avail_width
-            : (avail_width - column_spacing * (columns - 1)) / columns;
-
-        float total_row_width =
-            (columns == 1)
-            ? section_width
-            : section_width * columns + column_spacing * (columns - 1);
-
-        // ── Row start (LEFT only) ────────────────────────────────────
-        if (side == Side::Left || side == Side::None)
-        {
-            g_RowStartY = ImGui::GetCursorPosY();
-            g_RowMaxHeight = 0.0f;
-        }
-
-        // ── Center row horizontally ──────────────────────────────────
+        float section_width = (columns == 1) ? avail_width : (avail_width - column_spacing * (columns - 1)) / columns;
+        float total_row_width = (columns == 1) ? section_width : section_width * columns + column_spacing * (columns - 1);
         float content_start_x = ImGui::GetWindowContentRegionMin().x - ImGui::GetWindowPos().x;
         float start_x = content_start_x + (avail_width - total_row_width) * 0.5f;
 
         if (side == Side::Middle)
             start_x += section_width + column_spacing;
-
         if (side == Side::Right)
             start_x += (section_width + column_spacing) * 2;
 
-        // ── Lock cursor ──────────────────────────────────────────────
-        ImGui::SetCursorPos(ImVec2(start_x, g_RowStartY));
-        ImVec2 start_pos = ImGui::GetCursorScreenPos();
+        // ── Vertical layout ────────────────────────────────────────
+        float cursor_y;
+        if (g_ColumnNextY.count(side)) {
+            cursor_y = g_ColumnNextY[side];
+        }
+        else {
+            cursor_y = g_InitialY;
+        }
 
-        g_RowMaxHeight = ImMax(g_RowMaxHeight, height);
+        g_ColumnNextY[side] = cursor_y + height + SECTION_SPACING;
+
+        // ── Lock cursor ──────────────────────────────────────────────
+        ImGui::SetCursorPos(ImVec2(start_x, cursor_y));
+        ImVec2 start_pos = ImGui::GetCursorScreenPos();
 
         // ── Colors ───────────────────────────────────────────────────
         ImU32 accent_col = ImGui::GetColorU32(ImVec4(
@@ -149,11 +157,6 @@ namespace Custom {
     void EndSection(Side side)
     {
         ImGui::EndChild();
-
-        if (side == Side::Right || side == Side::None)
-        {
-            ImGui::SetCursorPosY(g_RowStartY + g_RowMaxHeight + 16.0f);
-        }
     }
 }
 
