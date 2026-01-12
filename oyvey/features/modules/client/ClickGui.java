@@ -4,6 +4,7 @@ import me.alpha432.oyvey.OyVey;
 import me.alpha432.oyvey.event.impl.ClientEvent;
 import me.alpha432.oyvey.event.system.Subscribe;
 import me.alpha432.oyvey.features.commands.Command;
+import me.alpha432.oyvey.features.gui.ImGuiScreen;
 import me.alpha432.oyvey.features.gui.OyVeyGui;
 import me.alpha432.oyvey.features.modules.Module;
 import me.alpha432.oyvey.features.settings.Setting;
@@ -60,7 +61,7 @@ public class ClickGui
         if (nullCheck()) {
             return;
         }
-        mc.setScreen(OyVeyGui.getClickGui());
+        mc.setScreen(new ImGuiScreen());
     }
 
     @Override
@@ -71,7 +72,7 @@ public class ClickGui
 
     @Override
     public void onTick() {
-        if (!(ClickGui.mc.screen instanceof OyVeyGui)) {
+        if (!(mc.screen instanceof ImGuiScreen)) {
             this.disable();
         }
     }

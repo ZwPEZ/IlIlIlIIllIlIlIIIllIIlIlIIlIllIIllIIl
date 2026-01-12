@@ -27,6 +27,7 @@ public class OyVey implements ModInitializer, ClientModInitializer {
     public static ModuleManager moduleManager;
     public static ConfigManager configManager;
     public static HudEditorScreen hudEditorScreen;
+    public static ImGuiManager imGuiManager;
 
     @Override
     public void onInitialize() {
@@ -53,6 +54,13 @@ public class OyVey implements ModInitializer, ClientModInitializer {
         configManager = new ConfigManager();
         configManager.load();
         colorManager.init();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> configManager.save()));
+
+        imGuiManager = new ImGuiManager();
+        imGuiManager.init();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            configManager.save();
+            imGuiManager.destroy();
+        }));
     }
 }
