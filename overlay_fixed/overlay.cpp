@@ -450,12 +450,12 @@ void Overlay::RenderMenu()
 }
 
 void Overlay::RenderLoadingAnimation() {
-    const float bg_fade_in_time = 0.6f;
+    const float bg_fade_time = 1.5f;
     const float drop_time = 1.7f;
     const float start_offset_y = 35.0f;
     const float dot_fade_time = 0.8f;
     const float shift_amount = 25.0f;
-    const float fade_out_time = 0.5f;
+    const float fade_out_time = 0.8f;
 
     auto now = std::chrono::steady_clock::now();
     float time = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start_time).count() / 1000.0f;
@@ -466,28 +466,30 @@ void Overlay::RenderLoadingAnimation() {
     ImDrawList* bg = ImGui::GetBackgroundDrawList();
     ImDrawList* fg = ImGui::GetForegroundDrawList();
 
-    // Calculate global fade-out alpha
+    // Calculate fade out alpha first
     float fade_out_alpha = 1.0f;
-    float time_since_main_anim = time - (drop_time + dot_fade_time);
-    if (time_since_main_anim > 0.0f) {
-        float fade_t = (std::min)(time_since_main_anim / fade_out_time, 1.0f);
-        fade_out_alpha = 1.0f - EaseOutCubic(fade_t);
+    float time_since_main = time - (drop_time + dot_fade_time);
+    if (time_since_main > 0.0f) {
+        fade_out_alpha = 1.0f - (std::min)(time_since_main / fade_out_time, 1.0f);
+        fade_out_alpha = fade_out_alpha * fade_out_alpha; // Smooth quadratic exit
     }
 
-    // Background fade in and out
-    float bg_in_t = (std::min)(time / bg_fade_in_time, 1.0f);
-    float bg_alpha = EaseOutCubic(bg_in_t) * 160.0f * fade_out_alpha;
+    // Background fade-in and out
+    float bg_t = (std::min)(time / bg_fade_time, 1.0f);
+    // Linear fade-in for the background to avoid it feeling "instant"
+    float bg_alpha = bg_t * 160.0f * fade_out_alpha;
     bg->AddRectFilled(ImVec2(0, 0), screen, IM_COL32(0, 0, 0, (int)bg_alpha));
 
-    // Drop and sync fade-in
+    // Drop animation factors
     float anim_time = (std::min)(time / drop_time, 1.0f);
     float anim = EaseOutCubic(anim_time);
 
     float y_offset = (1.0f - anim) * start_offset_y;
-    float text_alpha = anim * fade_out_alpha; // Sync fade-in (anim) and fade-out
+
+    // Improved text fade-in: starts slower and syncs with drop for a better look
+    float text_alpha = anim_time * anim_time * fade_out_alpha;
 
     const char* title = "FLAWLESS";
-    // Use the dedicated high-resolution font to ensure text is crisp at large sizes
     ImFont* font = s_loading_font ? s_loading_font : ImGui::GetFont();
     float font_size = 120.0f;
 
@@ -496,12 +498,14 @@ void Overlay::RenderLoadingAnimation() {
 
     float dot_anim = 0.0f;
     if (anim_time >= 1.0f) {
-        float dot_time = (std::min)((time - drop_time) / dot_fade_time, 1.0f);
+        float dot_time = (time - drop_time) / dot_fade_time;
+        dot_time = (std::min)((std::max)(dot_time, 0.0f), 1.0f);
         dot_anim = EaseOutCubic(dot_time);
+
         pos.x -= shift_amount * dot_anim;
     }
 
-    const int slices = 120; // Set to 120 as requested
+    const int slices = 120;
     float slice_h = size.y / slices;
     for (int i = 0; i < slices; i++) {
         float g = (float)i / (slices - 1);
@@ -519,11 +523,17 @@ void Overlay::RenderLoadingAnimation() {
     if (dot_anim > 0.0f) {
         const char* dot = ".win";
         float dot_font_size = font_size / 2.0f;
+
         ImVec2 dot_size = font->CalcTextSizeA(dot_font_size, FLT_MAX, 0.0f, dot);
-        ImVec2 dot_pos(pos.x + size.x + 8.0f * (1.0f - dot_anim), pos.y + size.y - dot_size.y - 15.0f);
+
+        ImVec2 dot_pos(
+            pos.x + size.x + 8.0f * (1.0f - dot_anim),
+            pos.y + size.y - dot_size.y - 15.0f
+        );
 
         const int dot_slices = 120;
         float dot_slice_h = dot_size.y / dot_slices;
+
         for (int i = 0; i < dot_slices; i++) {
             float g = (float)i / (dot_slices - 1);
             ImU8 r = static_cast<ImU8>(Theme::Accent[0] * 255.0f - g * 135.0f);
