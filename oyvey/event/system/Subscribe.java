@@ -10,4 +10,3 @@ import java.lang.annotation.Target;
 public @interface Subscribe {
     int priority() default 0;
 }
-

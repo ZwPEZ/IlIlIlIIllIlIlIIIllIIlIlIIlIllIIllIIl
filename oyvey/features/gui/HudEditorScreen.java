@@ -89,4 +89,3 @@ public class HudEditorScreen extends Screen {
         return components;
     }
 }
-

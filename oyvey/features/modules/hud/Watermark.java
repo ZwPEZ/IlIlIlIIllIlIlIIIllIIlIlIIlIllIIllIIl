@@ -26,4 +26,3 @@ public class Watermark extends HudModule {
         setHeight(mc.font.lineHeight);
     }
 }
-

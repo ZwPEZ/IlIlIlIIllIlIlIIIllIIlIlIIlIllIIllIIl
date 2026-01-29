@@ -19,4 +19,3 @@ public class MouseEvent extends Event {
         return action;
     }
 }
-

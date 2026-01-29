@@ -1,5 +1,6 @@
 package de.florianmichael.imguiexample;
 
+import de.florianmichael.imguiexample.manager.ModuleManager;
 import de.florianmichael.imguiexample.screens.ExampleScreen;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -13,8 +14,12 @@ public class ExampleMod implements ModInitializer {
             KeyMapping.Category.MISC
     );
 
+    public static ModuleManager moduleManager;
+
     @Override
     public void onInitialize() {
+        moduleManager = new ModuleManager();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (EXAMPLE_KEYBINDING.consumeClick()) {
                 client.setScreen(new ExampleScreen());
@@ -22,4 +27,3 @@ public class ExampleMod implements ModInitializer {
         });
     }
 }
-

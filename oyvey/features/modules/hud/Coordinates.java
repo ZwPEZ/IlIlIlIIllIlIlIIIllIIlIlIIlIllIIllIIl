@@ -39,4 +39,3 @@ public class Coordinates extends HudModule {
         setHeight(mc.font.lineHeight);
     }
 }
-
